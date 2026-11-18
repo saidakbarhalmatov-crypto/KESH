@@ -16,13 +16,7 @@ jobs:
         run: |
           mkdir -p extracted
           unzip -o KESH-Android-Project.zip -d extracted/
-          # Находим папки с проектом и копируем содержимое
-          find extracted/ -maxdepth 4 -name "settings.gradle*" -exec dirname {} \; | while read -r dir; do
-            if [ -f "$dir/build.gradle*" ]; then
-              cp -r "$dir"/* .
-              break
-            fi
-          done
+          cp -r extracted/*/* . 2>/dev/null || cp -r extracted/* .
           rm -rf extracted
           chmod +x gradlew
 
