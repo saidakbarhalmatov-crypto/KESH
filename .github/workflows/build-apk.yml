@@ -1,0 +1,43 @@
+name: Build KESH APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Unpack ZIP project
+        run: |
+          unzip -o KESH-Android-Project.zip -d temp_project
+          SUBDIR=$(find temp_project -mindepth 1 -maxdepth 1 -type d | head -n 1)
+          if [ -n "$SUBDIR" ] && [ -f "$SUBDIR/settings.gradle.kts" -o -f "$SUBDIR/settings.gradle" ]; then
+            cp -rn "$SUBDIR"/* .
+          else
+            cp -rn temp_project/* .
+          fi
+          rm -rf temp_project
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build Debug APK
+        run: gradle assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: KESH-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          
