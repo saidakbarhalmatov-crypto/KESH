@@ -16,30 +16,19 @@ jobs:
         run: |
           mkdir -p extracted
           unzip -o KESH-Android-Project.zip -d extracted/
-          PROJECT_DIR=$(find extracted/ -maxdepth 3 -name "gradlew" -exec dirname {} \; | head -n 1)
-          if [ -n "$PROJECT_DIR" ]; then
-            cp -r "$PROJECT_DIR"/* .
+          GRADLEW_PATH=$(find extracted/ -name "gradlew" | head -n 1)
+          if [ -n "$GRADLEW_PATH" ]; then
+            cd "$(dirname "$GRADLEW_PATH")"
           else
-            cp -r extracted/* .
+            echo "gradlew not found"
+            exit 1
           fi
-          rm -rf extracted
           chmod +x gradlew
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: KESH-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: **/outputs/apk/debug/*.apk
           
