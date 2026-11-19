@@ -16,7 +16,12 @@ jobs:
         run: |
           mkdir -p extracted
           unzip -o KESH-Android-Project.zip -d extracted/
-          cp -r extracted/*/* . 2>/dev/null || cp -r extracted/* .
+          PROJECT_DIR=$(find extracted/ -maxdepth 3 -name "gradlew" -exec dirname {} \; | head -n 1)
+          if [ -n "$PROJECT_DIR" ]; then
+            cp -r "$PROJECT_DIR"/* .
+          else
+            cp -r extracted/* .
+          fi
           rm -rf extracted
           chmod +x gradlew
 
