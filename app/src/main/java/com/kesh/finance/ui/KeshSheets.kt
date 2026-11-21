@@ -1,6 +1,5 @@
 package com.kesh.finance.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -373,13 +371,13 @@ fun ThemePickerSheet(
             Spacer(modifier = Modifier.height(14.dp))
 
             Text(
-                text = "Базовые темы (5)",
+                text = "Аниме-коллекция с живыми символами (6)",
                 color = spec.primary,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
-            baseThemes.forEach { item ->
+            animeThemes.forEach { item ->
                 ThemeRowCard(
                     item = item,
                     isSelected = item.id == currentThemeId,
@@ -390,13 +388,13 @@ fun ThemePickerSheet(
 
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Аниме-коллекция (6)",
+                text = "Базовые темы (5)",
                 color = spec.primary,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
-            animeThemes.forEach { item ->
+            baseThemes.forEach { item ->
                 ThemeRowCard(
                     item = item,
                     isSelected = item.id == currentThemeId,
@@ -432,20 +430,12 @@ private fun ThemeRowCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .clip(CircleShape)
-                        .background(item.primary)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Box(
-                    modifier = Modifier
-                        .size(20.dp)
-                        .clip(CircleShape)
-                        .background(item.secondary)
-                )
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Показываем живой герб темы (Шаринган, Крылья, Спираль, Молнию и т.д.)
+                KeshLuxuryEmblem(spec = item, size = 38.dp)
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(
