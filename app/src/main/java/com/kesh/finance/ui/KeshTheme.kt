@@ -1,31 +1,44 @@
 package com.kesh.finance.ui
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
+import kotlin.math.cos
+import kotlin.math.sin
 
-enum class AnimeVisualType {
-    NONE,
-    ITACHI,
-    ZENITSU,
-    GOJO,
-    TANJIRO,
-    HANJI,
-    NARUTO
+enum class KeshThemeId(val id: String) {
+    ITACHI("itachi"),
+    MADARA("madara"),
+    GOJO("gojo"),
+    YUTA("yuta"),
+    MIKASA("mikasa"),
+    MARIN("marin"),
+    DARK_PRO("dark_pro"),
+    LIGHT_CLEAN("light_clean")
 }
 
 data class KeshThemeSpec(
     val id: String,
     val name: String,
-    val subtitle: String,
     val motto: String,
+    val symbolTag: String,
     val isAnime: Boolean,
-    val isLight: Boolean,
-    val animeType: AnimeVisualType,
+    val isDark: Boolean,
     val background: Color,
     val surface: Color,
     val surfaceVariant: Color,
@@ -37,231 +50,304 @@ data class KeshThemeSpec(
 
 object KeshThemes {
     val all: List<KeshThemeSpec> = listOf(
-        // 5 базовых тем
-        KeshThemeSpec(
-            id = "royal_gold",
-            name = "Royal Gold",
-            subtitle = "Премиальный чёрно-золотой",
-            motto = "Классический контроль капитала",
-            isAnime = false,
-            isLight = false,
-            animeType = AnimeVisualType.NONE,
-            background = Color(0xFF090C14),
-            surface = Color(0xFF121826),
-            surfaceVariant = Color(0xFF1C2538),
-            primary = Color(0xFFD4AF37),
-            secondary = Color(0xFF38BDF8),
-            textPrimary = Color(0xFFF8FAFC),
-            textSecondary = Color(0xFF94A3B8)
-        ),
-        KeshThemeSpec(
-            id = "ocean",
-            name = "Ocean Deep",
-            subtitle = "Глубокий синий и бирюза",
-            motto = "Спокойный поток финансов",
-            isAnime = false,
-            isLight = false,
-            animeType = AnimeVisualType.NONE,
-            background = Color(0xFF061320),
-            surface = Color(0xFF0D2136),
-            surfaceVariant = Color(0xFF15314F),
-            primary = Color(0xFF38BDF8),
-            secondary = Color(0xFF2DD4BF),
-            textPrimary = Color(0xFFF0F9FF),
-            textSecondary = Color(0xFF93C5FD)
-        ),
-        KeshThemeSpec(
-            id = "forest_green",
-            name = "Forest Green",
-            subtitle = "Изумрудный финансовый стиль",
-            motto = "Устойчивый рост накоплений",
-            isAnime = false,
-            isLight = false,
-            animeType = AnimeVisualType.NONE,
-            background = Color(0xFF071510),
-            surface = Color(0xFF0F261E),
-            surfaceVariant = Color(0xFF183A2E),
-            primary = Color(0xFF10B981),
-            secondary = Color(0xFFA3E635),
-            textPrimary = Color(0xFFECFDF5),
-            textSecondary = Color(0xFF86EFAC)
-        ),
-        KeshThemeSpec(
-            id = "thunder",
-            name = "Thunder Volt",
-            subtitle = "Графит и электрический неон",
-            motto = "Скорость и точность учёта",
-            isAnime = false,
-            isLight = false,
-            animeType = AnimeVisualType.NONE,
-            background = Color(0xFF0D0B14),
-            surface = Color(0xFF181426),
-            surfaceVariant = Color(0xFF251F3B),
-            primary = Color(0xFFA855F7),
-            secondary = Color(0xFFFACC15),
-            textPrimary = Color(0xFFFAF5FF),
-            textSecondary = Color(0xFFC4B5FD)
-        ),
-        KeshThemeSpec(
-            id = "pure_light",
-            name = "Pure Light",
-            subtitle = "Чистая светлая тема",
-            motto = "Минимализм и ясность",
-            isAnime = false,
-            isLight = true,
-            animeType = AnimeVisualType.NONE,
-            background = Color(0xFFF4F6FA),
-            surface = Color(0xFFFFFFFF),
-            surfaceVariant = Color(0xFFE8EEF5),
-            primary = Color(0xFF0F172A),
-            secondary = Color(0xFF0284C7),
-            textPrimary = Color(0xFF0F172A),
-            textSecondary = Color(0xFF475569)
-        ),
-
-        // 6 уникальных аниме-тем
         KeshThemeSpec(
             id = "itachi",
             name = "Itachi",
-            subtitle = "Мангекё Шаринган и вороны",
-            motto = "Мангекё Шаринган • Абсолютный контроль",
+            motto = "Мангекё Шаринган • Красная луна и вороны",
+            symbolTag = "SHARINGAN",
             isAnime = true,
-            isLight = false,
-            animeType = AnimeVisualType.ITACHI,
-            background = Color(0xFF0B0507),
-            surface = Color(0xFF180A0F),
-            surfaceVariant = Color(0xFF2A1119),
-            primary = Color(0xFFEF4444),
-            secondary = Color(0xFFF87171),
-            textPrimary = Color(0xFFFFF1F2),
-            textSecondary = Color(0xFFFDA4AF)
+            isDark = true,
+            background = Color(0xFF0A0506),
+            surface = Color(0xFF170B0D),
+            surfaceVariant = Color(0xFF281216),
+            primary = Color(0xFFEF233C),
+            secondary = Color(0xFF9B0000),
+            textPrimary = Color(0xFFF8FAFC),
+            textSecondary = Color(0xFFCBD5E1)
         ),
         KeshThemeSpec(
-            id = "zenitsu",
-            name = "Zenitsu",
-            subtitle = "Дыхание Грома: Первый стиль",
-            motto = "Громовой раскат • Молниеносный расчёт",
+            id = "madara",
+            name = "Madara",
+            motto = "Вечный Мангекё • Пламя и Сусаноо",
+            symbolTag = "ETERNAL",
             isAnime = true,
-            isLight = false,
-            animeType = AnimeVisualType.ZENITSU,
-            background = Color(0xFF110E05),
-            surface = Color(0xFF201A0B),
-            surfaceVariant = Color(0xFF332910),
-            primary = Color(0xFFFACC15),
-            secondary = Color(0xFFFB923C),
-            textPrimary = Color(0xFFFEFCE8),
-            textSecondary = Color(0xFFFDE047)
+            isDark = true,
+            background = Color(0xFF0C0605),
+            surface = Color(0xFF1C0D0A),
+            surfaceVariant = Color(0xFF2F1510),
+            primary = Color(0xFFFF4500),
+            secondary = Color(0xFFDC2626),
+            textPrimary = Color(0xFFFFF7ED),
+            textSecondary = Color(0xFFFED7AA)
         ),
         KeshThemeSpec(
             id = "gojo",
             name = "Gojo",
-            subtitle = "Шесть Глаз и Бесконечность",
-            motto = "Муген • Безграничный баланс",
+            motto = "Безграничность • Шесть Глаз",
+            symbolTag = "INFINITY",
             isAnime = true,
-            isLight = false,
-            animeType = AnimeVisualType.GOJO,
-            background = Color(0xFF060A17),
-            surface = Color(0xFF0E162E),
-            surfaceVariant = Color(0xFF18254A),
+            isDark = true,
+            background = Color(0xFF040B14),
+            surface = Color(0xFF0A192F),
+            surfaceVariant = Color(0xFF112240),
             primary = Color(0xFF38BDF8),
-            secondary = Color(0xFFC084FC),
-            textPrimary = Color(0xFFEFF6FF),
-            textSecondary = Color(0xFF93C5FD)
+            secondary = Color(0xFF818CF8),
+            textPrimary = Color(0xFFF0F9FF),
+            textSecondary = Color(0xFFBAE6FD)
         ),
         KeshThemeSpec(
-            id = "tanjiro",
-            name = "Tanjiro",
-            subtitle = "Танец Бога Огня и Воды",
-            motto = "Хиноками Кагура • Сила стихий",
+            id = "yuta",
+            name = "Yuta Okkotsu",
+            motto = "Проклятая энергия • Чистая любовь",
+            symbolTag = "CURSED",
             isAnime = true,
-            isLight = false,
-            animeType = AnimeVisualType.TANJIRO,
-            background = Color(0xFF071311),
-            surface = Color(0xFF0F221E),
-            surfaceVariant = Color(0xFF17352F),
-            primary = Color(0xFF14B8A6),
-            secondary = Color(0xFFF97316),
-            textPrimary = Color(0xFFF0FDFA),
-            textSecondary = Color(0xFF5EEAD4)
+            isDark = true,
+            background = Color(0xFF090512),
+            surface = Color(0xFF150D26),
+            surfaceVariant = Color(0xFF23163D),
+            primary = Color(0xFFA855F7),
+            secondary = Color(0xFF6366F1),
+            textPrimary = Color(0xFFFAF5FF),
+            textSecondary = Color(0xFFE9D5FF)
         ),
         KeshThemeSpec(
-            id = "hanji",
-            name = "Hanji",
-            subtitle = "Крылья Свободы и исследования",
-            motto = "Разведкорпус • Точный анализ данных",
+            id = "mikasa",
+            name = "Mikasa",
+            motto = "Крылья Свободы • Алый шарф",
+            symbolTag = "WINGS",
             isAnime = true,
-            isLight = false,
-            animeType = AnimeVisualType.HANJI,
-            background = Color(0xFF0C100B),
-            surface = Color(0xFF171E16),
-            surfaceVariant = Color(0xFF242F22),
-            primary = Color(0xFF84CC16),
-            secondary = Color(0xFF38BDF8),
-            textPrimary = Color(0xFFF7FEE7),
-            textSecondary = Color(0xFFBEF264)
+            isDark = true,
+            background = Color(0xFF0B0C0E),
+            surface = Color(0xFF16181D),
+            surfaceVariant = Color(0xFF232730),
+            primary = Color(0xFFE11D48),
+            secondary = Color(0xFF64748B),
+            textPrimary = Color(0xFFF8FAFC),
+            textSecondary = Color(0xFFCBD5E1)
         ),
         KeshThemeSpec(
-            id = "naruto",
-            name = "Naruto",
-            subtitle = "Режим Мудреца Шести Путей",
-            motto = "Печать Восьми Триграмм • Воля Огня",
+            id = "marin",
+            name = "Marin",
+            motto = "Закат в городе • Тёплые огни",
+            symbolTag = "SUNSET",
             isAnime = true,
-            isLight = false,
-            animeType = AnimeVisualType.NARUTO,
-            background = Color(0xFF130B05),
-            surface = Color(0xFF23150A),
-            surfaceVariant = Color(0xFF36200F),
-            primary = Color(0xFFF97316),
-            secondary = Color(0xFFFACC15),
-            textPrimary = Color(0xFFFFF7ED),
-            textSecondary = Color(0xFFFDBA74)
+            isDark = true,
+            background = Color(0xFF140B14),
+            surface = Color(0xFF241322),
+            surfaceVariant = Color(0xFF381E34),
+            primary = Color(0xFFF472B6),
+            secondary = Color(0xFFFB923C),
+            textPrimary = Color(0xFFFFF1F2),
+            textSecondary = Color(0xFFFBCFE8)
+        ),
+        KeshThemeSpec(
+            id = "dark_pro",
+            name = "Тёмный Графит",
+            motto = "Строгий минимализм",
+            symbolTag = "MINIMAL",
+            isAnime = false,
+            isDark = true,
+            background = Color(0xFF090D16),
+            surface = Color(0xFF111827),
+            surfaceVariant = Color(0xFF1F2937),
+            primary = Color(0xFF10B981),
+            secondary = Color(0xFF3B82F6),
+            textPrimary = Color(0xFFF9FAFB),
+            textSecondary = Color(0xFF9CA3AF)
+        ),
+        KeshThemeSpec(
+            id = "light_clean",
+            name = "Светлая классика",
+            motto = "Чистый дневной режим",
+            symbolTag = "LIGHT",
+            isAnime = false,
+            isDark = false,
+            background = Color(0xFFF8FAFC),
+            surface = Color(0xFFFFFFFF),
+            surfaceVariant = Color(0xFFE2E8F0),
+            primary = Color(0xFF2563EB),
+            secondary = Color(0xFF0EA5E9),
+            textPrimary = Color(0xFF0F172A),
+            textSecondary = Color(0xFF475569)
         )
     )
 
-    fun byId(id: String): KeshThemeSpec {
-        return all.find { it.id == id } ?: all.first()
+    fun byId(id: String?): KeshThemeSpec {
+        return all.firstOrNull { it.id.equals(id, ignoreCase = true) } ?: all.first()
     }
 }
 
-val LocalKeshTheme = staticCompositionLocalOf { KeshThemes.all.first() }
+@Composable
+fun KeshAnimeAtmosphere(spec: KeshThemeSpec) {
+    if (!spec.isAnime) return
+
+    val infiniteTransition = rememberInfiniteTransition(label = "anime_bg")
+    val drift by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 14000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "drift"
+    )
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val w = size.width
+        val h = size.height
+
+        val auraCenter = Offset(
+            x = w * (0.72f - drift * 0.08f),
+            y = h * (0.14f + drift * 0.03f)
+        )
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    spec.primary.copy(alpha = 0.24f),
+                    spec.secondary.copy(alpha = 0.10f),
+                    Color.Transparent
+                ),
+                center = auraCenter,
+                radius = w * 0.65f
+            ),
+            radius = w * 0.65f,
+            center = auraCenter
+        )
+
+        val bottomGlow = Offset(x = w * 0.25f, y = h * 0.88f)
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    spec.secondary.copy(alpha = 0.18f),
+                    Color.Transparent
+                ),
+                center = bottomGlow,
+                radius = w * 0.7f
+            ),
+            radius = w * 0.7f,
+            center = bottomGlow
+        )
+
+        val particlePositions = listOf(
+            Offset(w * (0.18f + drift * 0.06f), h * 0.22f),
+            Offset(w * (0.82f - drift * 0.05f), h * 0.31f),
+            Offset(w * (0.28f + drift * 0.04f), h * 0.62f),
+            Offset(w * (0.76f - drift * 0.07f), h * 0.74f)
+        )
+
+        particlePositions.forEachIndexed { idx, pos ->
+            if (spec.id == "itachi" || spec.id == "madara" || spec.id == "mikasa") {
+                val wingSpan = 16f + idx * 3f
+                val path = Path().apply {
+                    moveTo(pos.x - wingSpan, pos.y + 4f)
+                    quadraticBezierTo(pos.x - wingSpan * 0.4f, pos.y - 8f, pos.x, pos.y)
+                    quadraticBezierTo(pos.x + wingSpan * 0.4f, pos.y - 8f, pos.x + wingSpan, pos.y + 4f)
+                }
+                drawPath(
+                    path = path,
+                    color = spec.primary.copy(alpha = 0.35f),
+                    style = Stroke(width = 2.5f, cap = StrokeCap.Round)
+                )
+            } else {
+                drawCircle(
+                    color = spec.primary.copy(alpha = 0.28f),
+                    radius = 5f + idx * 2f,
+                    center = pos
+                )
+            }
+        }
+    }
+}
 
 @Composable
-fun KeshAppTheme(
+fun ThemeEmblemBadge(
     spec: KeshThemeSpec,
-    content: @Composable () -> Unit
+    modifier: Modifier = Modifier
 ) {
-    val colorScheme = if (spec.isLight) {
-        lightColorScheme(
-            primary = spec.primary,
-            secondary = spec.secondary,
-            background = spec.background,
-            surface = spec.surface,
-            surfaceVariant = spec.surfaceVariant,
-            onPrimary = Color.White,
-            onSecondary = Color.White,
-            onBackground = spec.textPrimary,
-            onSurface = spec.textPrimary,
-            onSurfaceVariant = spec.textSecondary
-        )
-    } else {
-        darkColorScheme(
-            primary = spec.primary,
-            secondary = spec.secondary,
-            background = spec.background,
-            surface = spec.surface,
-            surfaceVariant = spec.surfaceVariant,
-            onPrimary = Color(0xFF090C14),
-            onSecondary = Color(0xFF090C14),
-            onBackground = spec.textPrimary,
-            onSurface = spec.textPrimary,
-            onSurfaceVariant = spec.textSecondary
-        )
-    }
+    val infiniteTransition = rememberInfiniteTransition(label = "emblem_spin")
+    val angle by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 12000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "angle"
+    )
 
-    CompositionLocalProvider(LocalKeshTheme provides spec) {
-        MaterialTheme(
-            colorScheme = colorScheme,
-            content = content
+    Canvas(modifier = modifier) {
+        val center = Offset(size.width / 2f, size.height / 2f)
+        val r = size.minDimension / 2f
+
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(spec.primary.copy(alpha = 0.45f), Color.Transparent),
+                center = center,
+                radius = r
+            ),
+            radius = r,
+            center = center
         )
+
+        drawCircle(
+            color = spec.surface,
+            radius = r * 0.82f,
+            center = center
+        )
+        drawCircle(
+            color = spec.primary,
+            radius = r * 0.82f,
+            center = center,
+            style = Stroke(width = r * 0.08f)
+        )
+
+        rotate(degrees = if (spec.isAnime) angle else 0f, pivot = center) {
+            when (spec.id) {
+                "itachi", "madara" -> {
+                    drawCircle(
+                        color = spec.primary.copy(alpha = 0.55f),
+                        radius = r * 0.48f,
+                        center = center,
+                        style = Stroke(width = r * 0.05f)
+                    )
+                    drawCircle(
+                        color = Color.Black,
+                        radius = r * 0.16f,
+                        center = center
+                    )
+                    for (i in 0 until 3) {
+                        val rad = Math.toRadians((i * 120.0) - 90.0)
+                        val tx = center.x + (r * 0.48f * cos(rad)).toFloat()
+                        val ty = center.y + (r * 0.48f * sin(rad)).toFloat()
+                        drawCircle(
+                            color = Color.Black,
+                            radius = r * 0.11f,
+                            center = Offset(tx, ty)
+                        )
+                    }
+                }
+                "gojo", "yuta" -> {
+                    drawCircle(
+                        color = spec.primary,
+                        radius = r * 0.42f,
+                        center = Offset(center.x - r * 0.14f, center.y),
+                        style = Stroke(width = r * 0.06f)
+                    )
+                    drawCircle(
+                        color = spec.secondary,
+                        radius = r * 0.42f,
+                        center = Offset(center.x + r * 0.14f, center.y),
+                        style = Stroke(width = r * 0.06f)
+                    )
+                }
+                else -> {
+                    drawCircle(
+                        color = spec.primary,
+                        radius = r * 0.32f,
+                        center = center
+                    )
+                }
+            }
+        }
     }
 }
