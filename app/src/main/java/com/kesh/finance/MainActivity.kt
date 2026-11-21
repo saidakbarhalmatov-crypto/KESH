@@ -46,8 +46,9 @@ import com.kesh.finance.data.OcrParsedReceipt
 import com.kesh.finance.data.TransactionType
 import com.kesh.finance.ocr.ReceiptOcrProcessor
 import com.kesh.finance.service.BankNotificationListenerService
-import com.kesh.finance.service.KyrgyzBankParser
+import com.kesh.finance.service.DailyReminderReceiver
 import com.kesh.finance.ui.AddOperationSheet
+import com.kesh.finance.ui.AiAssistantSheet
 import com.kesh.finance.ui.AnalyticsScreen
 import com.kesh.finance.ui.KeshAppTheme
 import com.kesh.finance.ui.KeshThemes
@@ -56,7 +57,6 @@ import com.kesh.finance.ui.OverviewScreen
 import com.kesh.finance.ui.SettingsScreen
 import com.kesh.finance.ui.ThemePickerSheet
 import kotlinx.coroutines.launch
-import java.util.Locale
 
 class MainActivity : ComponentActivity() {
 
@@ -66,6 +66,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        DailyReminderReceiver.scheduleDailyReminders(applicationContext)
         handleIncomingIntent(intent)
 
         setContent {
@@ -77,6 +78,7 @@ class MainActivity : ComponentActivity() {
             val themeId by prefs.selectedThemeId.collectAsState()
             val userName by prefs.userName.collectAsState()
             val monthlyBudget by prefs.monthlyBudget.collectAsState()
+            val geminiApiKey by prefs.geminiApiKey.collectAsState()
             val autoBankEnabled by prefs.autoBankEnabled.collectAsState()
             val transactions by repo.transactions.collectAsState(initial = emptyList())
 
@@ -85,6 +87,7 @@ class MainActivity : ComponentActivity() {
             var selectedTab by remember { mutableIntStateOf(0) }
             var showThemePicker by remember { mutableStateOf(false) }
             var showAddSheet by remember { mutableStateOf(false) }
+            var showAiSheet by remember { mutableStateOf(false) }
             var prefillAmount by remember { mutableStateOf("") }
             var prefillType by remember { mutableStateOf(TransactionType.EXPENSE) }
             var prefillTitle by remember { mutableStateOf("") }
@@ -136,33 +139,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            val voiceLauncher = rememberLauncherForActivityResult(
-                contract = ActivityResultContracts.StartActivityForResult()
-            ) { result ->
-                if (result.resultCode == Activity.RESULT_OK) {
-                    val matches = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-                    val spoken = matches?.firstOrNull().orEmpty()
-                    val parsed = repo.parseVoiceInput(spoken)
-                    if (parsed != null) {
-                        val (amt, type, title) = parsed
-                        val autoCat = KyrgyzBankParser.detectCategory(title.lowercase(Locale("ru")), type)
-                        scope.launch {
-                            repo.addTransaction(
-                                amount = amt,
-                                type = type,
-                                category = autoCat,
-                                title = title,
-                                bankName = "Голос",
-                                source = "VOICE"
-                            )
-                            Toast.makeText(context, "Записано: $title ($amt сом)", Toast.LENGTH_SHORT).show()
-                        }
-                    } else {
-                        Toast.makeText(context, "Не удалось распознать сумму: $spoken", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-
             KeshAppTheme(spec = spec) {
                 Scaffold(
                     containerColor = spec.background,
@@ -209,21 +185,7 @@ class MainActivity : ComponentActivity() {
                                     showAddSheet = true
                                 },
                                 onScanReceipt = { pickReceiptLauncher.launch("image/*") },
-                                onVoiceInput = {
-                                    try {
-                                        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                                            putExtra(
-                                                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                                                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-                                            )
-                                            putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ru-RU")
-                                            putExtra(RecognizerIntent.EXTRA_PROMPT, "Например: Кофе 250 сом")
-                                        }
-                                        voiceLauncher.launch(intent)
-                                    } catch (e: Exception) {
-                                        Toast.makeText(context, "Голосовой ввод недоступен", Toast.LENGTH_SHORT).show()
-                                    }
-                                },
+                                onOpenAiAssistant = { showAiSheet = true },
                                 onDeleteTransaction = { tx ->
                                     scope.launch { repo.deleteTransaction(tx) }
                                 }
@@ -241,10 +203,12 @@ class MainActivity : ComponentActivity() {
                                 spec = spec,
                                 userName = userName,
                                 monthlyBudget = monthlyBudget,
+                                geminiApiKey = geminiApiKey,
                                 autoBankEnabled = autoBankEnabled,
                                 hasNotificationPermission = hasNotificationPermission,
                                 onUpdateUserName = { prefs.setUserName(it) },
                                 onUpdateBudget = { prefs.setMonthlyBudget(it) },
+                                onUpdateGeminiApiKey = { prefs.setGeminiApiKey(it) },
                                 onToggleAutoBank = { prefs.setAutoBankEnabled(it) },
                                 onOpenNotificationSettings = {
                                     context.startActivity(
@@ -276,6 +240,33 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
+                    }
+
+                    if (showAiSheet) {
+                        AiAssistantSheet(
+                            spec = spec,
+                            apiKey = geminiApiKey,
+                            repo = repo,
+                            onDismiss = { showAiSheet = false },
+                            onTransactionSaved = { parsed ->
+                                scope.launch {
+                                    repo.addTransaction(
+                                        amount = parsed.amount,
+                                        type = parsed.type,
+                                        category = parsed.category,
+                                        title = parsed.title,
+                                        bankName = parsed.bankName,
+                                        source = "AI_ASSISTANT"
+                                    )
+                                    showAiSheet = false
+                                    Toast.makeText(
+                                        context,
+                                        "Записано: ${parsed.title} (${parsed.amount} сом)",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        )
                     }
 
                     if (showAddSheet) {
