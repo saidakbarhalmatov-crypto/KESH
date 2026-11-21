@@ -70,6 +70,5 @@ dependencies {
     ksp("androidx.room:room-compiler:2.6.1")
 
     implementation("com.google.mlkit:text-recognition:16.0.1")
-    implementation("com.google.mlkit:text-recognition-cyrillic:16.0.1")
     implementation("com.google.code.gson:gson:2.11.0")
 }
