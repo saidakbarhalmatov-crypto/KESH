@@ -18,23 +18,17 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Unpack ZIP project
-        run: |
-          mkdir -p extracted
-          unzip -o KESH-Android-Project.zip -d extracted/
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: 8.9
 
       - name: Build APK
-        working-directory: extracted/KESH-Android-Project
         run: gradle assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: KESH-debug-apk
-          path: 'extracted/KESH-Android-Project/app/build/outputs/apk/debug/*.apk'
+          path: 'app/build/outputs/apk/debug/*.apk'
           
