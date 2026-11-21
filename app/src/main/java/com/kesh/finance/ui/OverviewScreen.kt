@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -20,8 +22,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowDownward
 import androidx.compose.material.icons.rounded.ArrowUpward
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.DocumentScanner
-import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -58,7 +60,7 @@ fun OverviewScreen(
     onOpenThemes: () -> Unit,
     onOpenAdd: () -> Unit,
     onScanReceipt: () -> Unit,
-    onVoiceInput: () -> Unit,
+    onOpenAiAssistant: () -> Unit,
     onDeleteTransaction: (TransactionEntity) -> Unit
 ) {
     var selectedFilter by remember { mutableStateOf("ALL") }
@@ -148,7 +150,7 @@ fun OverviewScreen(
                         .padding(horizontal = 16.dp)
                         .border(
                             width = if (spec.isAnime) 1.dp else 0.dp,
-                            color = if (spec.isAnime) spec.primary.copy(alpha = 0.4f) else Color.Transparent,
+                            color = if (spec.isAnime) spec.primary.copy(alpha = 0.45f) else Color.Transparent,
                             shape = RoundedCornerShape(24.dp)
                         ),
                     shape = RoundedCornerShape(24.dp),
@@ -170,20 +172,30 @@ fun OverviewScreen(
                         Column {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(text = "Общий баланс", color = spec.textSecondary, fontSize = 13.sp)
-                                Text(
-                                    text = spec.motto,
-                                    color = spec.primary,
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                ThemeEmblemBadge(
+                                    spec = spec,
+                                    modifier = Modifier.size(44.dp)
                                 )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Общий баланс",
+                                        color = spec.textSecondary,
+                                        fontSize = 13.sp
+                                    )
+                                    Text(
+                                        text = spec.motto,
+                                        color = spec.primary,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
                             }
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = formatSom(balance),
                                 color = spec.textPrimary,
@@ -253,7 +265,7 @@ fun OverviewScreen(
                 ) {
                     QuickActionTile("Добавить", Icons.Rounded.Add, spec, true, onOpenAdd, Modifier.weight(1f))
                     QuickActionTile("Чек OCR", Icons.Rounded.DocumentScanner, spec, false, onScanReceipt, Modifier.weight(1f))
-                    QuickActionTile("Голос", Icons.Rounded.Mic, spec, false, onVoiceInput, Modifier.weight(1f))
+                    QuickActionTile("ИИ-Чат", Icons.Rounded.AutoAwesome, spec, false, onOpenAiAssistant, Modifier.weight(1f))
                 }
             }
 
@@ -296,7 +308,7 @@ fun OverviewScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Операций пока нет. Нажмите «Добавить», отсканируйте чек или скажите голосом.",
+                            text = "Операций пока нет. Нажмите «Добавить», «Чек OCR» или «ИИ-Чат».",
                             color = spec.textSecondary,
                             fontSize = 14.sp
                         )
