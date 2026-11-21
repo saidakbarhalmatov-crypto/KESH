@@ -11,7 +11,11 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountBalanceWallet
 import androidx.compose.material.icons.rounded.PieChart
@@ -21,7 +25,6 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -31,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
 import androidx.lifecycle.Lifecycle
@@ -60,6 +64,7 @@ class MainActivity : ComponentActivity() {
     private val openQuickAddState = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         handleIncomingIntent(intent)
 
@@ -105,7 +110,7 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(incomingUri) {
                 val uri = incomingUri ?: return@LaunchedEffect
                 incomingUriState.value = null
-                Toast.makeText(context, "Распознаю чек...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Сканирую чек...", Toast.LENGTH_SHORT).show()
                 ocrResult = ReceiptOcrProcessor.recognizeReceiptFromUri(context, uri)
             }
 
@@ -183,88 +188,94 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                     }
-                ) { _ ->
-                    when (selectedTab) {
-                        0 -> OverviewScreen(
-                            spec = spec,
-                            userName = userName,
-                            monthlyBudget = monthlyBudget,
-                            isAutoBankActive = autoBankEnabled && hasNotificationPermission,
-                            transactions = transactions,
-                            onOpenThemes = { showThemePicker = true },
-                            onOpenAdd = {
-                                prefillAmount = ""
-                                prefillType = TransactionType.EXPENSE
-                                prefillTitle = ""
-                                showAddSheet = true
-                            },
-                            onScanReceipt = { pickReceiptLauncher.launch("image/*") },
-                            onVoiceInput = {
-                                try {
-                                    val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                                        putExtra(
-                                            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                                            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-                                        )
-                                        putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ru-RU")
-                                        putExtra(RecognizerIntent.EXTRA_PROMPT, "Например: Кофе 250 сом")
+                ) { innerPadding ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(bottom = innerPadding.calculateBottomPadding())
+                    ) {
+                        when (selectedTab) {
+                            0 -> OverviewScreen(
+                                spec = spec,
+                                userName = userName,
+                                monthlyBudget = monthlyBudget,
+                                isAutoBankActive = autoBankEnabled && hasNotificationPermission,
+                                transactions = transactions,
+                                onOpenThemes = { showThemePicker = true },
+                                onOpenAdd = {
+                                    prefillAmount = ""
+                                    prefillType = TransactionType.EXPENSE
+                                    prefillTitle = ""
+                                    showAddSheet = true
+                                },
+                                onScanReceipt = { pickReceiptLauncher.launch("image/*") },
+                                onVoiceInput = {
+                                    try {
+                                        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                                            putExtra(
+                                                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                                            )
+                                            putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ru-RU")
+                                            putExtra(RecognizerIntent.EXTRA_PROMPT, "Например: Кофе 250 сом")
+                                        }
+                                        voiceLauncher.launch(intent)
+                                    } catch (e: Exception) {
+                                        Toast.makeText(context, "Голосовой ввод недоступен", Toast.LENGTH_SHORT).show()
                                     }
-                                    voiceLauncher.launch(intent)
-                                } catch (e: Exception) {
-                                    Toast.makeText(context, "Голосовой ввод недоступен на устройстве", Toast.LENGTH_SHORT).show()
+                                },
+                                onDeleteTransaction = { tx ->
+                                    scope.launch { repo.deleteTransaction(tx) }
                                 }
-                            },
-                            onDeleteTransaction = { tx ->
-                                scope.launch { repo.deleteTransaction(tx) }
-                            }
-                        )
+                            )
 
-                        1 -> AnalyticsScreen(
-                            spec = spec,
-                            userName = userName,
-                            isAutoBankActive = autoBankEnabled && hasNotificationPermission,
-                            transactions = transactions,
-                            onOpenThemes = { showThemePicker = true }
-                        )
+                            1 -> AnalyticsScreen(
+                                spec = spec,
+                                userName = userName,
+                                isAutoBankActive = autoBankEnabled && hasNotificationPermission,
+                                transactions = transactions,
+                                onOpenThemes = { showThemePicker = true }
+                            )
 
-                        2 -> SettingsScreen(
-                            spec = spec,
-                            userName = userName,
-                            monthlyBudget = monthlyBudget,
-                            autoBankEnabled = autoBankEnabled,
-                            hasNotificationPermission = hasNotificationPermission,
-                            onUpdateUserName = { prefs.setUserName(it) },
-                            onUpdateBudget = { prefs.setMonthlyBudget(it) },
-                            onToggleAutoBank = { prefs.setAutoBankEnabled(it) },
-                            onOpenNotificationSettings = {
-                                context.startActivity(
-                                    Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).apply {
-                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            2 -> SettingsScreen(
+                                spec = spec,
+                                userName = userName,
+                                monthlyBudget = monthlyBudget,
+                                autoBankEnabled = autoBankEnabled,
+                                hasNotificationPermission = hasNotificationPermission,
+                                onUpdateUserName = { prefs.setUserName(it) },
+                                onUpdateBudget = { prefs.setMonthlyBudget(it) },
+                                onToggleAutoBank = { prefs.setAutoBankEnabled(it) },
+                                onOpenNotificationSettings = {
+                                    context.startActivity(
+                                        Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).apply {
+                                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        }
+                                    )
+                                },
+                                onOpenThemes = { showThemePicker = true },
+                                onExportCsv = {
+                                    val file = repo.exportCsv(context, transactions)
+                                    val uri = FileProvider.getUriForFile(
+                                        context,
+                                        "${context.packageName}.fileprovider",
+                                        file
+                                    )
+                                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/csv"
+                                        putExtra(Intent.EXTRA_STREAM, uri)
+                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                     }
-                                )
-                            },
-                            onOpenThemes = { showThemePicker = true },
-                            onExportCsv = {
-                                val file = repo.exportCsv(context, transactions)
-                                val uri = FileProvider.getUriForFile(
-                                    context,
-                                    "${context.packageName}.fileprovider",
-                                    file
-                                )
-                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                    type = "text/csv"
-                                    putExtra(Intent.EXTRA_STREAM, uri)
-                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    context.startActivity(Intent.createChooser(shareIntent, "Экспорт KESH CSV"))
+                                },
+                                onClearAll = {
+                                    scope.launch {
+                                        repo.clearAll()
+                                        Toast.makeText(context, "База очищена", Toast.LENGTH_SHORT).show()
+                                    }
                                 }
-                                context.startActivity(Intent.createChooser(shareIntent, "Экспорт KESH CSV"))
-                            },
-                            onClearAll = {
-                                scope.launch {
-                                    repo.clearAll()
-                                    Toast.makeText(context, "База очищена", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        )
+                            )
+                        }
                     }
 
                     if (showAddSheet) {
