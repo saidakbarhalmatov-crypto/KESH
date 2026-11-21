@@ -4,7 +4,7 @@ import android.content.Context
 import android.net.Uri
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.cyrillic.CyrillicTextRecognizerOptions
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.kesh.finance.data.Category
 import com.kesh.finance.data.OcrParsedReceipt
 import com.kesh.finance.data.TransactionType
@@ -19,9 +19,7 @@ object ReceiptOcrProcessor {
     suspend fun recognizeReceiptFromUri(context: Context, uri: Uri): OcrParsedReceipt {
         return try {
             val image = InputImage.fromFilePath(context, uri)
-            val recognizer = TextRecognition.getClient(
-                CyrillicTextRecognizerOptions.Builder().build()
-            )
+            val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
             val visionText = suspendCancellableCoroutine<String> { cont ->
                 recognizer.process(image)
                     .addOnSuccessListener { result ->
