@@ -57,10 +57,12 @@ fun SettingsScreen(
     spec: KeshThemeSpec,
     userName: String,
     monthlyBudget: Double,
+    geminiApiKey: String,
     autoBankEnabled: Boolean,
     hasNotificationPermission: Boolean,
     onUpdateUserName: (String) -> Unit,
     onUpdateBudget: (Double) -> Unit,
+    onUpdateGeminiApiKey: (String) -> Unit,
     onToggleAutoBank: (Boolean) -> Unit,
     onOpenNotificationSettings: () -> Unit,
     onOpenThemes: () -> Unit,
@@ -73,6 +75,7 @@ fun SettingsScreen(
             if (monthlyBudget % 1.0 == 0.0) monthlyBudget.toInt().toString() else monthlyBudget.toString()
         )
     }
+    var apiKeyInput by remember(geminiApiKey) { mutableStateOf(geminiApiKey) }
     var showClearDialog by remember { mutableStateOf(false) }
 
     Box(
@@ -106,7 +109,7 @@ fun SettingsScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "Профиль и бюджет",
+                            text = "Профиль, ИИ и бюджет",
                             color = spec.textPrimary,
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp
@@ -128,16 +131,26 @@ fun SettingsScreen(
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.fillMaxWidth()
                         )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        OutlinedTextField(
+                            value = apiKeyInput,
+                            onValueChange = { apiKeyInput = it },
+                            label = { Text("Бесплатный Gemini API ключ") },
+                            placeholder = { Text("AIza...") },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                         Spacer(modifier = Modifier.height(12.dp))
                         Button(
                             onClick = {
                                 onUpdateUserName(nameInput.trim().ifBlank { "Саидакбар" })
                                 budgetInput.toDoubleOrNull()?.let { if (it > 0.0) onUpdateBudget(it) }
+                                onUpdateGeminiApiKey(apiKeyInput.trim())
                             },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(14.dp)
                         ) {
-                            Text("Сохранить профиль и лимит", fontWeight = FontWeight.Bold)
+                            Text("Сохранить настройки", fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -200,7 +213,7 @@ fun SettingsScreen(
                                 )
                                 Text(
                                     text = if (hasNotificationPermission) {
-                                        "Доступ к уведомлениям активен"
+                                        "Доступ к уведомлениям активен • Напоминания 13:05, 15:05, 19:30"
                                     } else {
                                         "Требуется доступ к уведомлениям"
                                     },
