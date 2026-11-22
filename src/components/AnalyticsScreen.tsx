@@ -1,16 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import { CATEGORIES, CategoryId, formatSom, TransactionEntity, TransactionType } from '../data/models';
-import { KeshThemeSpec, ThemeScene } from '../theme/keshThemes';
+import { KeshThemeSpec } from '../theme/keshThemes';
 import { AkatsukiCloudSvg, AnalyticsAnimeCenter } from './KeshAnimeArt';
 import { KeshTopHeader } from './KeshBrandComponents';
 
 export const AnalyticsScreen: React.FC<{
   spec: KeshThemeSpec;
-  activeScene: ThemeScene | null;
   userName: string;
   transactions: TransactionEntity[];
   onOpenThemes: () => void;
-}> = ({ spec, activeScene, userName, transactions, onOpenThemes }) => {
+}> = ({ spec, userName, transactions, onOpenThemes }) => {
   const [selectedType, setSelectedType] = useState<TransactionType>('EXPENSE');
 
   const filtered = useMemo(
@@ -75,16 +74,16 @@ export const AnalyticsScreen: React.FC<{
                   key={type}
                   type="button"
                   onClick={() => setSelectedType(type)}
-                  className="py-3 rounded-2xl font-bold text-sm transition-colors cursor-pointer min-h-[44px] backdrop-blur-md"
+                  className="py-3 rounded-2xl font-bold text-sm transition-colors cursor-pointer min-h-[44px] backdrop-blur-xl"
                   style={{
-                    backgroundColor: isSelected ? spec.primary : spec.surfaceGlass,
+                    backgroundColor: isSelected ? spec.buttonGlass : spec.surfaceGlass,
                     color: isSelected
                       ? spec.isLight
                         ? '#FFFFFF'
-                        : '#090C14'
+                        : '#FFFFFF'
                       : spec.textPrimary,
                     border: `1px solid ${isSelected ? spec.primary : spec.cardBorder}`,
-                    boxShadow: isSelected ? spec.cardGlow : 'none',
+                    boxShadow: spec.cardGlow,
                   }}
                 >
                   {label}
@@ -92,7 +91,14 @@ export const AnalyticsScreen: React.FC<{
               );
             })}
           </div>
-          <span className="text-xs font-bold" style={{ color: spec.primary }}>
+          <span
+            className="text-xs font-bold px-3 py-1.5 rounded-xl backdrop-blur-xl"
+            style={{
+              backgroundColor: spec.surfaceGlass,
+              color: spec.primary,
+              border: `1px solid ${spec.cardBorder}`,
+            }}
+          >
             {spec.analyticsLabel}
           </span>
         </div>
@@ -100,7 +106,7 @@ export const AnalyticsScreen: React.FC<{
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
           {/* Donut Chart Card */}
           <div
-            className="lg:col-span-5 rounded-3xl p-5 flex flex-col items-center backdrop-blur-md relative overflow-hidden"
+            className="lg:col-span-5 rounded-3xl p-5 flex flex-col items-center backdrop-blur-xl relative overflow-hidden"
             style={{
               backgroundColor: spec.surfaceGlass,
               border: `1px solid ${spec.cardBorder}`,
@@ -113,38 +119,7 @@ export const AnalyticsScreen: React.FC<{
               </div>
             )}
 
-            {spec.isAnime && activeScene && (
-              <div
-                className="w-full rounded-2xl p-2.5 mb-4 flex items-center gap-3 relative z-10"
-                style={{
-                  backgroundColor: `${spec.background}CC`,
-                  border: `1px solid ${spec.cardBorder}`,
-                }}
-              >
-                <img
-                  src={activeScene.image}
-                  alt={`${spec.name} — ${activeScene.label}`}
-                  referrerPolicy="no-referrer"
-                  className="w-12 h-12 rounded-xl object-cover object-top shrink-0"
-                />
-                <div className="min-w-0 flex-1">
-                  <div
-                    className="text-xs font-bold truncate"
-                    style={{ color: spec.primary }}
-                  >
-                    {spec.characterTitle}
-                  </div>
-                  <div
-                    className="text-[11px] truncate"
-                    style={{ color: spec.textSecondary }}
-                  >
-                    Сцена: {activeScene.label}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {spec.isAnime && !activeScene && (
+            {spec.isAnime && (
               <div
                 className="text-xs font-bold mb-3 text-center relative z-10"
                 style={{ color: spec.primary }}
@@ -223,7 +198,7 @@ export const AnalyticsScreen: React.FC<{
           <div className="lg:col-span-7 space-y-3">
             {categoryStats.length === 0 ? (
               <div
-                className="rounded-2xl p-6 text-center text-sm backdrop-blur-md"
+                className="rounded-2xl p-6 text-center text-sm backdrop-blur-xl"
                 style={{
                   backgroundColor: spec.surfaceGlass,
                   color: spec.textSecondary,
@@ -241,7 +216,7 @@ export const AnalyticsScreen: React.FC<{
                 return (
                   <div
                     key={category.id}
-                    className="rounded-2xl p-4 backdrop-blur-md"
+                    className="rounded-2xl p-4 backdrop-blur-xl"
                     style={{
                       backgroundColor: spec.surfaceGlass,
                       border: `1px solid ${spec.cardBorder}`,

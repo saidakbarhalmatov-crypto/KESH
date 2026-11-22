@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Download, Palette, Trash2 } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Download, Image as ImageIcon, Palette, Trash2 } from 'lucide-react';
 import { KeshThemeSpec } from '../theme/keshThemes';
 import { AkatsukiCloudSvg, KeshLuxuryEmblem } from './KeshAnimeArt';
 import { KeshTopHeader } from './KeshBrandComponents';
@@ -9,8 +9,11 @@ export const SettingsScreen: React.FC<{
   userName: string;
   monthlyBudget: number;
   geminiApiKey: string;
+  hasCustomPhoto: boolean;
   onUpdateSettings: (name: string, budget: number, apiKey: string) => void;
   onOpenThemes: () => void;
+  onPickGalleryPhoto: (file: File) => void;
+  onResetCustomPhoto: () => void;
   onExportCsv: () => void;
   onClearAll: () => void;
 }> = ({
@@ -18,8 +21,11 @@ export const SettingsScreen: React.FC<{
   userName,
   monthlyBudget,
   geminiApiKey,
+  hasCustomPhoto,
   onUpdateSettings,
   onOpenThemes,
+  onPickGalleryPhoto,
+  onResetCustomPhoto,
   onExportCsv,
   onClearAll,
 }) => {
@@ -30,14 +36,13 @@ export const SettingsScreen: React.FC<{
   const [apiKeyInput, setApiKeyInput] = useState(geminiApiKey);
   const [savedNotice, setSavedNotice] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
+  const galleryInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     setNameInput(userName);
     setBudgetInput(monthlyBudget % 1 === 0 ? String(Math.round(monthlyBudget)) : String(monthlyBudget));
     setApiKeyInput(geminiApiKey);
   }, [userName, monthlyBudget, geminiApiKey]);
-
-  const accentTextColor = spec.isLight ? '#FFFFFF' : '#090C14';
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,8 +60,22 @@ export const SettingsScreen: React.FC<{
     <div className="relative z-10 pb-28 max-w-4xl mx-auto">
       <KeshTopHeader userName={userName} spec={spec} onOpenThemes={onOpenThemes} />
 
+      <input
+        ref={galleryInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) {
+            onPickGalleryPhoto(file);
+          }
+          e.target.value = '';
+        }}
+      />
+
       <div className="px-4 sm:px-6 space-y-4">
-        <h1 className="text-2xl font-extrabold" style={{ color: spec.textPrimary }}>
+        <h1 className="text-2xl font-extrabold drop-shadow-sm" style={{ color: spec.textPrimary }}>
           Настройки
         </h1>
 
@@ -64,7 +83,7 @@ export const SettingsScreen: React.FC<{
           {/* Profile, AI & Budget */}
           <form
             onSubmit={handleSave}
-            className="rounded-3xl p-5 space-y-3 backdrop-blur-md relative overflow-hidden"
+            className="rounded-3xl p-5 space-y-3 backdrop-blur-xl relative overflow-hidden"
             style={{
               backgroundColor: spec.surfaceGlass,
               border: `1px solid ${spec.cardBorder}`,
@@ -88,9 +107,9 @@ export const SettingsScreen: React.FC<{
                 type="text"
                 value={nameInput}
                 onChange={(e) => setNameInput(e.target.value)}
-                className="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none"
+                className="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none backdrop-blur-md"
                 style={{
-                  backgroundColor: spec.background,
+                  backgroundColor: `${spec.background}88`,
                   color: spec.textPrimary,
                   border: `1px solid ${spec.cardBorder}`,
                 }}
@@ -106,9 +125,9 @@ export const SettingsScreen: React.FC<{
                 inputMode="decimal"
                 value={budgetInput}
                 onChange={(e) => setBudgetInput(e.target.value)}
-                className="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none tabular-nums"
+                className="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none tabular-nums backdrop-blur-md"
                 style={{
-                  backgroundColor: spec.background,
+                  backgroundColor: `${spec.background}88`,
                   color: spec.textPrimary,
                   border: `1px solid ${spec.cardBorder}`,
                 }}
@@ -124,9 +143,9 @@ export const SettingsScreen: React.FC<{
                 value={apiKeyInput}
                 onChange={(e) => setApiKeyInput(e.target.value)}
                 placeholder="AIza..."
-                className="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none"
+                className="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none backdrop-blur-md"
                 style={{
-                  backgroundColor: spec.background,
+                  backgroundColor: `${spec.background}88`,
                   color: spec.textPrimary,
                   border: `1px solid ${spec.cardBorder}`,
                 }}
@@ -135,10 +154,12 @@ export const SettingsScreen: React.FC<{
 
             <button
               type="submit"
-              className="w-full py-3 rounded-2xl font-bold text-sm transition-transform active:scale-[0.98] cursor-pointer min-h-[44px]"
+              className="w-full py-3 rounded-2xl font-bold text-sm transition-transform active:scale-[0.98] cursor-pointer min-h-[44px] backdrop-blur-xl"
               style={{
-                backgroundColor: spec.primary,
-                color: accentTextColor,
+                backgroundColor: spec.buttonGlass,
+                color: '#FFFFFF',
+                border: `1px solid ${spec.cardBorder}`,
+                boxShadow: spec.cardGlow,
               }}
             >
               {savedNotice ? 'Настройки сохранены' : 'Сохранить настройки'}
@@ -146,43 +167,77 @@ export const SettingsScreen: React.FC<{
           </form>
 
           <div className="space-y-4">
-            {/* Themes */}
+            {/* Themes & Gallery Photo */}
             <div
-              className="rounded-3xl p-5 flex items-center justify-between gap-4 backdrop-blur-md"
+              className="rounded-3xl p-5 space-y-3 backdrop-blur-xl"
               style={{
                 backgroundColor: spec.surfaceGlass,
                 border: `1px solid ${spec.cardBorder}`,
                 boxShadow: spec.cardGlow,
               }}
             >
-              <div className="flex items-center gap-3 min-w-0">
-                <KeshLuxuryEmblem spec={spec} size={40} />
-                <div className="min-w-0">
-                  <h2 className="font-bold text-base" style={{ color: spec.textPrimary }}>
-                    Оформление и темы
-                  </h2>
-                  <p className="text-xs mt-0.5 truncate" style={{ color: spec.textSecondary }}>
-                    Активна: {spec.name} · {spec.motto}
-                  </p>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <KeshLuxuryEmblem spec={spec} size={40} />
+                  <div className="min-w-0">
+                    <h2 className="font-bold text-base" style={{ color: spec.textPrimary }}>
+                      Оформление и фото
+                    </h2>
+                    <p className="text-xs mt-0.5 truncate" style={{ color: spec.textSecondary }}>
+                      Тема: {spec.name} · {spec.motto}
+                    </p>
+                  </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={onOpenThemes}
+                  className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-semibold shrink-0 cursor-pointer min-h-[44px] backdrop-blur-md"
+                  style={{
+                    backgroundColor: `${spec.primary}26`,
+                    color: spec.textPrimary,
+                    border: `1px solid ${spec.cardBorder}`,
+                  }}
+                >
+                  <Palette size={16} style={{ color: spec.primary }} />
+                  <span>Темы</span>
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={onOpenThemes}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold shrink-0 cursor-pointer min-h-[44px]"
-                style={{
-                  color: spec.primary,
-                  border: `1px solid ${spec.primary}66`,
-                }}
-              >
-                <Palette size={17} />
-                <span>Выбрать</span>
-              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => galleryInputRef.current?.click()}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-semibold cursor-pointer min-h-[42px] backdrop-blur-md"
+                  style={{
+                    backgroundColor: `${spec.background}66`,
+                    color: spec.textPrimary,
+                    border: `1px solid ${spec.cardBorder}`,
+                  }}
+                >
+                  <ImageIcon size={16} style={{ color: spec.primary }} />
+                  <span>Выбрать фото из галереи</span>
+                </button>
+
+                {hasCustomPhoto && (
+                  <button
+                    type="button"
+                    onClick={onResetCustomPhoto}
+                    className="px-3 py-2.5 rounded-xl text-xs font-semibold cursor-pointer min-h-[42px] backdrop-blur-md"
+                    style={{
+                      backgroundColor: 'rgba(239, 68, 68, 0.18)',
+                      color: '#FCA5A5',
+                      border: '1px solid rgba(239, 68, 68, 0.35)',
+                    }}
+                  >
+                    Сброс
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Data management */}
             <div
-              className="rounded-3xl p-5 space-y-2.5 backdrop-blur-md"
+              className="rounded-3xl p-5 space-y-2.5 backdrop-blur-xl"
               style={{
                 backgroundColor: spec.surfaceGlass,
                 border: `1px solid ${spec.cardBorder}`,
@@ -195,8 +250,9 @@ export const SettingsScreen: React.FC<{
               <button
                 type="button"
                 onClick={onExportCsv}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold cursor-pointer min-h-[44px]"
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold cursor-pointer min-h-[44px] backdrop-blur-md"
                 style={{
+                  backgroundColor: `${spec.background}66`,
                   color: spec.textPrimary,
                   border: `1px solid ${spec.cardBorder}`,
                 }}
@@ -208,8 +264,9 @@ export const SettingsScreen: React.FC<{
               <button
                 type="button"
                 onClick={() => setShowClearDialog(true)}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-red-500 cursor-pointer min-h-[44px]"
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-rose-300 cursor-pointer min-h-[44px] backdrop-blur-md"
                 style={{
+                  backgroundColor: 'rgba(239,68,68,0.12)',
                   border: '1px solid rgba(239,68,68,0.35)',
                 }}
               >

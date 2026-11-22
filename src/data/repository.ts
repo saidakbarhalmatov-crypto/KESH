@@ -3,7 +3,7 @@ import { CategoryId, TransactionEntity, TransactionSource, TransactionType, CATE
 export interface KeshPrefsState {
   selectedThemeId: string;
   selectedSceneByTheme: Record<string, string>;
-  autoMoodScene: boolean;
+  customPhotoByTheme: Record<string, string>;
   userName: string;
   monthlyBudget: number;
   geminiApiKey: string;
@@ -15,7 +15,7 @@ const TX_STORAGE_KEY = 'kesh_transactions_v2';
 export const DEFAULT_PREFS: KeshPrefsState = {
   selectedThemeId: 'itachi',
   selectedSceneByTheme: {},
-  autoMoodScene: false,
+  customPhotoByTheme: {},
   userName: 'Саидакбар',
   monthlyBudget: 35000,
   geminiApiKey: '',
@@ -27,15 +27,28 @@ export function loadPrefs(): KeshPrefsState {
     if (!raw) return DEFAULT_PREFS;
     const parsed = JSON.parse(raw);
     return {
-      selectedThemeId: typeof parsed.selectedThemeId === 'string' ? parsed.selectedThemeId : DEFAULT_PREFS.selectedThemeId,
+      selectedThemeId:
+        typeof parsed.selectedThemeId === 'string'
+          ? parsed.selectedThemeId
+          : DEFAULT_PREFS.selectedThemeId,
       selectedSceneByTheme:
         parsed.selectedSceneByTheme && typeof parsed.selectedSceneByTheme === 'object'
           ? parsed.selectedSceneByTheme
           : {},
-      autoMoodScene: typeof parsed.autoMoodScene === 'boolean' ? parsed.autoMoodScene : DEFAULT_PREFS.autoMoodScene,
-      userName: typeof parsed.userName === 'string' && parsed.userName.trim() ? parsed.userName : DEFAULT_PREFS.userName,
-      monthlyBudget: typeof parsed.monthlyBudget === 'number' && parsed.monthlyBudget > 0 ? parsed.monthlyBudget : DEFAULT_PREFS.monthlyBudget,
-      geminiApiKey: typeof parsed.geminiApiKey === 'string' ? parsed.geminiApiKey : DEFAULT_PREFS.geminiApiKey,
+      customPhotoByTheme:
+        parsed.customPhotoByTheme && typeof parsed.customPhotoByTheme === 'object'
+          ? parsed.customPhotoByTheme
+          : {},
+      userName:
+        typeof parsed.userName === 'string' && parsed.userName.trim()
+          ? parsed.userName
+          : DEFAULT_PREFS.userName,
+      monthlyBudget:
+        typeof parsed.monthlyBudget === 'number' && parsed.monthlyBudget > 0
+          ? parsed.monthlyBudget
+          : DEFAULT_PREFS.monthlyBudget,
+      geminiApiKey:
+        typeof parsed.geminiApiKey === 'string' ? parsed.geminiApiKey : DEFAULT_PREFS.geminiApiKey,
     };
   } catch {
     return DEFAULT_PREFS;

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { CheckCircle2, ScanLine, X } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { CheckCircle2, Image as ImageIcon, RotateCcw, ScanLine, X } from 'lucide-react';
 import {
   CategoryId,
   getCategoriesForType,
@@ -430,23 +430,53 @@ export const OcrReviewSheet: React.FC<{
 
 export const ThemePickerSheet: React.FC<{
   currentThemeId: string;
-  selectedSceneByTheme?: Record<string, string>;
+  selectedSceneByTheme: Record<string, string>;
+  customPhotoByTheme: Record<string, string>;
   spec: KeshThemeSpec;
   onSelectTheme: (id: string) => void;
+  onSelectScene: (themeId: string, sceneId: string) => void;
+  onPickGalleryPhoto: (themeId: string, file: File) => void;
+  onClearCustomPhoto: (themeId: string) => void;
   onDismiss: () => void;
-}> = ({ currentThemeId, selectedSceneByTheme, spec, onSelectTheme, onDismiss }) => {
+}> = ({
+  currentThemeId,
+  selectedSceneByTheme,
+  customPhotoByTheme,
+  spec,
+  onSelectTheme,
+  onSelectScene,
+  onPickGalleryPhoto,
+  onClearCustomPhoto,
+  onDismiss,
+}) => {
   const animeThemes = KESH_THEMES.filter((t) => t.isAnime);
   const baseThemes = KESH_THEMES.filter((t) => !t.isAnime);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const currentCustomPhoto = customPhotoByTheme[currentThemeId];
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+      className="fixed inset-0 z-50 bg-black/65 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4"
       onClick={onDismiss}
     >
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) {
+            onPickGalleryPhoto(currentThemeId, file);
+          }
+          e.target.value = '';
+        }}
+      />
+
       <div
-        className="w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl p-5 max-h-[88vh] overflow-y-auto space-y-4"
+        className="w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl p-5 max-h-[88vh] overflow-y-auto space-y-4 backdrop-blur-2xl"
         style={{
-          backgroundColor: spec.surface,
+          backgroundColor: spec.isLight ? 'rgba(255,255,255,0.88)' : 'rgba(18, 22, 32, 0.82)',
           border: `1px solid ${spec.cardBorder}`,
           boxShadow: spec.cardGlow,
         }}
@@ -454,7 +484,7 @@ export const ThemePickerSheet: React.FC<{
       >
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold" style={{ color: spec.textPrimary }}>
-            Темы оформления KESH
+            Темы и фото обоев
           </h2>
           <button
             type="button"
@@ -467,22 +497,98 @@ export const ThemePickerSheet: React.FC<{
           </button>
         </div>
 
+        {/* Gallery photo picker for active theme */}
+        <div
+          className="rounded-2xl p-3.5 space-y-2.5 backdrop-blur-xl"
+          style={{
+            backgroundColor: spec.surfaceGlass,
+            border: `1px solid ${spec.cardBorder}`,
+          }}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-bold" style={{ color: spec.primary }}>
+              Фото для темы «{spec.name}»
+            </span>
+            {currentCustomPhoto && (
+              <button
+                type="button"
+                onClick={() => onClearCustomPhoto(currentThemeId)}
+                className="flex items-center gap-1 text-[11px] font-semibold text-rose-300 cursor-pointer"
+              >
+                <RotateCcw size={12} />
+                <span>Сбросить фото</span>
+              </button>
+            )}
+          </div>
+
+          {spec.scenes.length > 0 && (
+            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+              {spec.scenes.map((sc) => {
+                const activeSceneId = selectedSceneByTheme[currentThemeId] ?? spec.scenes[0]?.id;
+                const isSceneCurrent = !currentCustomPhoto && sc.id === activeSceneId;
+                return (
+                  <button
+                    key={sc.id}
+                    type="button"
+                    onClick={() => onSelectScene(currentThemeId, sc.id)}
+                    className="shrink-0 w-20 rounded-xl overflow-hidden cursor-pointer text-left transition-transform active:scale-95"
+                    style={{
+                      border: `2px solid ${isSceneCurrent ? spec.primary : 'rgba(255,255,255,0.18)'}`,
+                      backgroundColor: spec.background,
+                    }}
+                  >
+                    <img
+                      src={sc.image}
+                      alt={sc.label}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-14 object-cover"
+                      style={{ objectPosition: sc.position }}
+                    />
+                    <div
+                      className="px-1.5 py-1 text-[10px] font-semibold truncate"
+                      style={{ color: isSceneCurrent ? spec.primary : spec.textSecondary }}
+                    >
+                      {sc.label}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-semibold cursor-pointer min-h-[40px] backdrop-blur-md"
+            style={{
+              backgroundColor: `${spec.primary}26`,
+              color: spec.textPrimary,
+              border: `1px solid ${spec.cardBorder}`,
+            }}
+          >
+            <ImageIcon size={16} style={{ color: spec.primary }} />
+            <span>Выбрать фото из галереи устройства</span>
+          </button>
+        </div>
+
         <div className="space-y-2.5">
           <div className="text-xs font-bold" style={{ color: spec.primary }}>
             Аниме-коллекция персонажей ({animeThemes.length})
           </div>
           {animeThemes.map((item) => {
             const isSelected = item.id === currentThemeId;
-            const activeSceneId = selectedSceneByTheme?.[item.id] ?? item.scenes[0]?.id;
-            const previewBg =
-              item.scenes.find((s) => s.id === activeSceneId)?.image ?? item.backgroundImage;
+            const activeSceneId = selectedSceneByTheme[item.id] ?? item.scenes[0]?.id;
+            const customImg = customPhotoByTheme[item.id];
+            const activeSceneObj = item.scenes.find((s) => s.id === activeSceneId) ?? item.scenes[0];
+            const previewBg = customImg ?? activeSceneObj?.image ?? item.backgroundImage;
+            const previewPos = customImg ? 'center center' : activeSceneObj?.position ?? 'center center';
 
             return (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => onSelectTheme(item.id)}
-                className="w-full rounded-2xl p-3.5 text-left cursor-pointer transition-transform active:scale-[0.99] relative overflow-hidden space-y-2.5"
+                className="w-full rounded-2xl p-3.5 text-left cursor-pointer transition-transform active:scale-[0.99] relative overflow-hidden"
                 style={{
                   backgroundColor: item.background,
                   border: `${isSelected ? 2 : 1}px solid ${
@@ -496,9 +602,16 @@ export const ThemePickerSheet: React.FC<{
                     src={previewBg}
                     alt={item.name}
                     referrerPolicy="no-referrer"
-                    className="absolute inset-0 w-full h-full object-cover object-top opacity-25 pointer-events-none"
+                    className="absolute inset-0 w-full h-full object-cover opacity-45 pointer-events-none"
+                    style={{ objectPosition: previewPos }}
                   />
                 )}
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: `linear-gradient(90deg, ${item.background}CC 0%, ${item.background}66 100%)`,
+                  }}
+                />
                 <div className="flex items-center justify-between gap-3 relative z-10">
                   <div className="flex items-center gap-3 min-w-0">
                     <KeshLuxuryEmblem spec={item} size={42} />
@@ -519,38 +632,6 @@ export const ThemePickerSheet: React.FC<{
                     />
                   )}
                 </div>
-
-                {item.scenes.length > 0 && (
-                  <div className="flex items-center gap-1.5 relative z-10">
-                    {item.scenes.slice(0, 4).map((sc) => {
-                      const isSceneCurrent = sc.id === activeSceneId;
-                      return (
-                        <div
-                          key={sc.id}
-                          className="w-11 h-8 rounded-lg overflow-hidden shrink-0"
-                          style={{
-                            border: `1.5px solid ${
-                              isSceneCurrent ? item.primary : 'rgba(255,255,255,0.18)'
-                            }`,
-                          }}
-                        >
-                          <img
-                            src={sc.image}
-                            alt={`${item.name} — ${sc.label}`}
-                            referrerPolicy="no-referrer"
-                            className="w-full h-full object-cover object-top"
-                          />
-                        </div>
-                      );
-                    })}
-                    <span
-                      className="text-[11px] font-semibold ml-1 truncate"
-                      style={{ color: item.textSecondary }}
-                    >
-                      {item.scenes.length} сцены
-                    </span>
-                  </div>
-                )}
               </button>
             );
           })}

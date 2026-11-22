@@ -53,29 +53,14 @@ export function App() {
 
   const spec = useMemo(() => getThemeById(prefs.selectedThemeId), [prefs.selectedThemeId]);
 
-  const monthExpense = useMemo(() => {
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0).getTime();
-    let sum = 0;
-    for (const tx of transactions) {
-      if (tx.type === 'EXPENSE' && tx.timestamp >= startOfMonth) {
-        sum += tx.amount;
-      }
-    }
-    return sum;
-  }, [transactions]);
-
-  const budgetRatio = Math.min(Math.max(monthExpense / Math.max(prefs.monthlyBudget, 1), 0), 1);
-
   const activeScene = useMemo(
     () =>
       resolveActiveScene(
         spec,
         prefs.selectedSceneByTheme[spec.id],
-        prefs.autoMoodScene,
-        budgetRatio
+        prefs.customPhotoByTheme[spec.id]
       ),
-    [spec, prefs.selectedSceneByTheme, prefs.autoMoodScene, budgetRatio]
+    [spec, prefs.selectedSceneByTheme, prefs.customPhotoByTheme]
   );
 
   useEffect(() => {
@@ -91,6 +76,31 @@ export function App() {
     setTimeout(() => {
       setToastMessage((prev) => (prev === msg ? null : prev));
     }, 3200);
+  };
+
+  const handlePickGalleryPhoto = async (themeId: string, file: File) => {
+    try {
+      const { dataUrl } = await fileToScaledBase64(file);
+      setPrefs((p) => ({
+        ...p,
+        customPhotoByTheme: {
+          ...p.customPhotoByTheme,
+          [themeId]: dataUrl,
+        },
+      }));
+      showToast('Фото из галереи установлено');
+    } catch {
+      showToast('Не удалось загрузить фото из галереи');
+    }
+  };
+
+  const handleClearCustomPhoto = (themeId: string) => {
+    setPrefs((p) => {
+      const next = { ...p.customPhotoByTheme };
+      delete next[themeId];
+      return { ...p, customPhotoByTheme: next };
+    });
+    showToast('Возвращено фото темы');
   };
 
   const addTransaction = (params: {
@@ -181,34 +191,20 @@ export function App() {
         color: spec.textPrimary,
       }}
     >
-      <KeshAnimeAtmosphere spec={spec} activeBackgroundImage={activeScene?.image} />
+      <KeshAnimeAtmosphere
+        spec={spec}
+        activeBackgroundImage={activeScene?.image}
+        imagePosition={activeScene?.position}
+      />
 
       <main className="relative z-10">
         {selectedTab === 0 && (
           <OverviewScreen
             spec={spec}
-            activeScene={activeScene}
-            autoMoodScene={prefs.autoMoodScene}
             userName={prefs.userName}
             monthlyBudget={prefs.monthlyBudget}
             transactions={transactions}
             onOpenThemes={() => setShowThemePicker(true)}
-            onSelectScene={(sceneId) => {
-              setPrefs((p) => ({
-                ...p,
-                autoMoodScene: false,
-                selectedSceneByTheme: {
-                  ...p.selectedSceneByTheme,
-                  [spec.id]: sceneId,
-                },
-              }));
-            }}
-            onToggleAutoMoodScene={() => {
-              setPrefs((p) => ({
-                ...p,
-                autoMoodScene: !p.autoMoodScene,
-              }));
-            }}
             onOpenAdd={() => setShowAddSheet(true)}
             onScanReceiptFile={handleScanReceiptFile}
             onOpenAiAssistant={() => setShowAiSheet(true)}
@@ -219,7 +215,6 @@ export function App() {
         {selectedTab === 1 && (
           <AnalyticsScreen
             spec={spec}
-            activeScene={activeScene}
             userName={prefs.userName}
             transactions={transactions}
             onOpenThemes={() => setShowThemePicker(true)}
@@ -232,10 +227,13 @@ export function App() {
             userName={prefs.userName}
             monthlyBudget={prefs.monthlyBudget}
             geminiApiKey={prefs.geminiApiKey}
+            hasCustomPhoto={Boolean(prefs.customPhotoByTheme[spec.id])}
             onUpdateSettings={(userName, monthlyBudget, geminiApiKey) => {
               setPrefs((p) => ({ ...p, userName, monthlyBudget, geminiApiKey }));
             }}
             onOpenThemes={() => setShowThemePicker(true)}
+            onPickGalleryPhoto={(file) => void handlePickGalleryPhoto(spec.id, file)}
+            onResetCustomPhoto={() => handleClearCustomPhoto(spec.id)}
             onExportCsv={() => exportTransactionsCsv(transactions)}
             onClearAll={() => {
               setTransactions([]);
@@ -245,13 +243,14 @@ export function App() {
         )}
       </main>
 
-      {/* Bottom Navigation Bar */}
+      {/* iPhone-style Translucent Frosted Bottom Navigation Bar */}
       <nav
         aria-label="Основная навигация"
-        className="fixed bottom-0 left-0 right-0 z-40 border-t backdrop-blur-md"
+        className="fixed bottom-0 left-0 right-0 z-40 border-t backdrop-blur-2xl"
         style={{
           backgroundColor: spec.surfaceGlass,
           borderColor: spec.cardBorder,
+          boxShadow: spec.cardGlow,
         }}
       >
         <div className="max-w-xl mx-auto grid grid-cols-3 h-16">
@@ -282,9 +281,9 @@ export function App() {
       {/* Toast feedback */}
       {toastMessage && (
         <div
-          className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl text-xs font-semibold shadow-lg pointer-events-none"
+          className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl text-xs font-semibold shadow-lg pointer-events-none backdrop-blur-xl"
           style={{
-            backgroundColor: spec.surfaceVariant,
+            backgroundColor: spec.surfaceGlass,
             color: spec.textPrimary,
             border: `1px solid ${spec.cardBorder}`,
           }}
@@ -337,8 +336,25 @@ export function App() {
         <ThemePickerSheet
           currentThemeId={prefs.selectedThemeId}
           selectedSceneByTheme={prefs.selectedSceneByTheme}
+          customPhotoByTheme={prefs.customPhotoByTheme}
           spec={spec}
           onSelectTheme={(selectedThemeId) => setPrefs((p) => ({ ...p, selectedThemeId }))}
+          onSelectScene={(themeId, sceneId) => {
+            setPrefs((p) => {
+              const nextCustom = { ...p.customPhotoByTheme };
+              delete nextCustom[themeId];
+              return {
+                ...p,
+                customPhotoByTheme: nextCustom,
+                selectedSceneByTheme: {
+                  ...p.selectedSceneByTheme,
+                  [themeId]: sceneId,
+                },
+              };
+            });
+          }}
+          onPickGalleryPhoto={(themeId, file) => void handlePickGalleryPhoto(themeId, file)}
+          onClearCustomPhoto={handleClearCustomPhoto}
           onDismiss={() => setShowThemePicker(false)}
         />
       )}

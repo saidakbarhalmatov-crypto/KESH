@@ -240,44 +240,36 @@ export const CharacterAddActionIcon: React.FC<{ spec: KeshThemeSpec; size?: numb
 export const KeshAnimeAtmosphere: React.FC<{
   spec: KeshThemeSpec;
   activeBackgroundImage?: string;
-}> = ({ spec, activeBackgroundImage }) => {
-  if (!spec.isAnime) return null;
+  imagePosition?: string;
+}> = ({ spec, activeBackgroundImage, imagePosition = 'center center' }) => {
   const bgSrc = activeBackgroundImage || spec.backgroundImage;
+  if (!bgSrc) return null;
 
   return (
     <div
       className="pointer-events-none fixed inset-0 overflow-hidden z-0"
       aria-hidden="true"
     >
-      {bgSrc && (
-        <img
-          src={bgSrc}
-          alt={spec.characterTitle}
-          referrerPolicy="no-referrer"
-          className="w-full h-full object-cover object-center opacity-50 transition-opacity duration-500"
-        />
-      )}
+      <img
+        src={bgSrc}
+        alt={spec.characterTitle}
+        referrerPolicy="no-referrer"
+        className="w-full h-full object-cover opacity-95 transition-opacity duration-500"
+        style={{ objectPosition: imagePosition }}
+      />
 
-      {/* Measured contrast scrim for crisp 4.5:1+ readability across all views */}
+      {/* Light breathable vignette so the wallpaper photo stays crisp behind frosted glass */}
       <div
         className="absolute inset-0"
         style={{
-          background: `linear-gradient(180deg, ${spec.background}80 0%, ${spec.background}B8 48%, ${spec.background}F0 100%)`,
-        }}
-      />
-
-      {/* Lightweight signature ambient glow */}
-      <div
-        className="absolute -top-24 -right-24 w-[380px] h-[380px] rounded-full blur-3xl opacity-25"
-        style={{
-          background: `radial-gradient(circle, ${spec.primary}, transparent 70%)`,
+          background: `linear-gradient(180deg, ${spec.background}22 0%, ${spec.background}36 55%, ${spec.background}5E 100%)`,
         }}
       />
 
       {/* Character-specific crisp vector accents */}
       {spec.animeType === 'ITACHI' && (
         <svg viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full">
-          <g fill="rgba(239,35,60,0.28)">
+          <g fill="rgba(239,35,60,0.22)">
             <path d="M150 220 Q120 190 90 210 Q125 215 150 240 Q175 215 210 210 Q180 190 150 220 Z" />
             <path d="M840 690 Q815 668 790 684 Q820 688 840 708 Q860 688 890 684 Q865 668 840 690 Z" />
           </g>

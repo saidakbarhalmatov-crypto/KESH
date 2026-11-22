@@ -20,13 +20,11 @@ export type AnimeVisualType =
   | 'MIKASA'
   | 'MARIN';
 
-export type SceneMood = 'calm' | 'focus' | 'alert';
-
 export interface ThemeScene {
   id: string;
   label: string;
   image: string;
-  mood: SceneMood;
+  position: string;
 }
 
 export interface KeshThemeSpec {
@@ -44,14 +42,10 @@ export interface KeshThemeSpec {
   isLight: boolean;
   backgroundImage?: string;
   scenes: ThemeScene[];
-  quotes: {
-    healthy: string;
-    caution: string;
-    alert: string;
-  };
   background: string;
   surface: string;
   surfaceGlass: string;
+  buttonGlass: string;
   surfaceVariant: string;
   primary: string;
   secondary: string;
@@ -81,42 +75,38 @@ export const KESH_THEMES: KeshThemeSpec[] = [
         id: 'itachi_throne_photo',
         label: 'Трон Учихи',
         image: '/assets/aistudio/4f93cd372dc13a218b8edc9a86a13539_ee7537d8.jpg',
-        mood: 'focus',
+        position: 'center 35%',
       },
       {
         id: 'itachi_anbu_moon',
         label: 'Ночь АНБУ',
         image: '/assets/aistudio/IMG_679ec574-5ded-420b-b1ca-672aaa6ab3c2_1cc1e720.jpg',
-        mood: 'alert',
+        position: 'center 42%',
       },
       {
         id: 'itachi_smile',
         label: 'Спокойствие',
         image: '/assets/aistudio/IMG_a240894e-60f9-4125-9c05-226853e251e2_4617de8e.jpg',
-        mood: 'calm',
+        position: 'center 25%',
       },
       {
         id: 'itachi_crimson_moon',
         label: 'Красная луна',
         image: itachiThroneBg,
-        mood: 'focus',
+        position: 'center 38%',
       },
     ],
-    quotes: {
-      healthy: 'Бюджет под полным контролем. Истинная сила — в спокойствии и расчёте.',
-      caution: 'Половина лимита пройдена. Наблюдай за каждой тратой взглядом Шарингана.',
-      alert: 'Лимит почти исчерпан! Остановись и сохрани резерв на конец месяца.',
-    },
-    background: '#080304',
-    surface: '#110608',
-    surfaceGlass: 'rgba(12, 5, 7, 0.84)',
-    surfaceVariant: '#2A0D12',
+    background: '#090506',
+    surface: '#160B0D',
+    surfaceGlass: 'rgba(18, 9, 11, 0.42)',
+    buttonGlass: 'rgba(239, 35, 60, 0.56)',
+    surfaceVariant: 'rgba(46, 16, 22, 0.58)',
     primary: '#EF233C',
-    secondary: '#9B0000',
-    cardBorder: 'rgba(239, 35, 60, 0.48)',
-    cardGlow: '0 0 24px rgba(239, 35, 60, 0.18)',
-    textPrimary: '#F8FAFC',
-    textSecondary: '#E2C4C8',
+    secondary: '#D4A373',
+    cardBorder: 'rgba(255, 255, 255, 0.22)',
+    cardGlow: '0 8px 32px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+    textPrimary: '#FFFFFF',
+    textSecondary: '#E7D5D8',
   },
   {
     id: 'madara',
@@ -137,30 +127,26 @@ export const KESH_THEMES: KeshThemeSpec[] = [
         id: 'madara_flames',
         label: 'Пламя Сусаноо',
         image: madaraFlamesBg,
-        mood: 'focus',
+        position: 'center 35%',
       },
       {
         id: 'madara_moon',
         label: 'Полная луна',
         image: madaraMoonScene,
-        mood: 'calm',
+        position: 'center 40%',
       },
     ],
-    quotes: {
-      healthy: 'Твоя казна крепка, как броня Сусаноо. Продолжай держать темп.',
-      caution: 'Расходы разгораются. Направь траты в нужное русло, пока не вспыхнул лимит.',
-      alert: 'Опасная черта! Лимит месяца горит — пора закрыть лишние расходы.',
-    },
-    background: '#0B0403',
-    surface: '#170907',
-    surfaceGlass: 'rgba(18, 7, 5, 0.84)',
-    surfaceVariant: '#33120B',
+    background: '#0C0504',
+    surface: '#1A0B08',
+    surfaceGlass: 'rgba(24, 10, 7, 0.42)',
+    buttonGlass: 'rgba(255, 87, 34, 0.56)',
+    surfaceVariant: 'rgba(54, 18, 12, 0.58)',
     primary: '#FF5722',
-    secondary: '#DC2626',
-    cardBorder: 'rgba(255, 87, 34, 0.48)',
-    cardGlow: '0 0 24px rgba(255, 87, 34, 0.18)',
-    textPrimary: '#FFF7ED',
-    textSecondary: '#FDBA74',
+    secondary: '#FB923C',
+    cardBorder: 'rgba(255, 255, 255, 0.22)',
+    cardGlow: '0 8px 32px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+    textPrimary: '#FFFFFF',
+    textSecondary: '#FDE2C8',
   },
   {
     id: 'gojo',
@@ -181,36 +167,32 @@ export const KESH_THEMES: KeshThemeSpec[] = [
         id: 'gojo_infinity',
         label: 'Безграничность',
         image: gojoInfinityBg,
-        mood: 'focus',
+        position: 'center 35%',
       },
       {
         id: 'gojo_rooftop',
         label: 'Крыша Токио',
         image: gojoBlindfoldScene,
-        mood: 'calm',
+        position: 'center 30%',
       },
       {
         id: 'gojo_purple',
         label: 'Шесть Глаз',
         image: gojoPurpleScene,
-        mood: 'alert',
+        position: 'center 35%',
       },
     ],
-    quotes: {
-      healthy: 'Расслабься — с таким запасом бюджета ты буквально в Безграничности!',
-      caution: 'Шесть Глаз видят каждую покупку. Половина лимита уже позади.',
-      alert: 'Внимание: барьер лимита почти пробит. Включаем режим экономии!',
-    },
-    background: '#030914',
-    surface: '#081529',
-    surfaceGlass: 'rgba(7, 17, 36, 0.82)',
-    surfaceVariant: '#112545',
+    background: '#050C1A',
+    surface: '#0B172E',
+    surfaceGlass: 'rgba(10, 22, 44, 0.40)',
+    buttonGlass: 'rgba(56, 189, 248, 0.52)',
+    surfaceVariant: 'rgba(20, 42, 76, 0.56)',
     primary: '#38BDF8',
     secondary: '#818CF8',
-    cardBorder: 'rgba(56, 189, 248, 0.45)',
-    cardGlow: '0 0 24px rgba(56, 189, 248, 0.18)',
-    textPrimary: '#F0F9FF',
-    textSecondary: '#BAE6FD',
+    cardBorder: 'rgba(255, 255, 255, 0.24)',
+    cardGlow: '0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.22)',
+    textPrimary: '#FFFFFF',
+    textSecondary: '#D6EEFF',
   },
   {
     id: 'yuta',
@@ -231,37 +213,33 @@ export const KESH_THEMES: KeshThemeSpec[] = [
         id: 'yuta_katana',
         label: 'Катана и аура',
         image: yutaCursedBg,
-        mood: 'focus',
+        position: 'center 35%',
       },
       {
         id: 'yuta_night',
         label: 'Ночной Токио',
         image: yutaRingScene,
-        mood: 'calm',
+        position: 'center 35%',
       },
     ],
-    quotes: {
-      healthy: 'Спокойный баланс — лучший щит. Все категории в стабильном плюсе.',
-      caution: 'Энергия бюджета распределяется активно — проверь топ категорий в аналитике.',
-      alert: 'Резерв на исходе! Самое время притормозить спонтанные покупки.',
-    },
-    background: '#080412',
-    surface: '#120A24',
-    surfaceGlass: 'rgba(15, 8, 30, 0.84)',
-    surfaceVariant: '#271447',
+    background: '#090514',
+    surface: '#150C29',
+    surfaceGlass: 'rgba(19, 10, 38, 0.42)',
+    buttonGlass: 'rgba(168, 85, 247, 0.54)',
+    surfaceVariant: 'rgba(42, 22, 76, 0.56)',
     primary: '#A855F7',
-    secondary: '#6366F1',
-    cardBorder: 'rgba(168, 85, 247, 0.46)',
-    cardGlow: '0 0 24px rgba(168, 85, 247, 0.18)',
-    textPrimary: '#FAF5FF',
-    textSecondary: '#E9D5FF',
+    secondary: '#818CF8',
+    cardBorder: 'rgba(255, 255, 255, 0.22)',
+    cardGlow: '0 8px 32px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+    textPrimary: '#FFFFFF',
+    textSecondary: '#EBD9FF',
   },
   {
     id: 'mikasa',
     name: 'Mikasa',
-    characterTitle: 'Микаса Аккерман · Крылья Свободы',
-    motto: 'Крылья Свободы · Алый шарф',
-    subtitle: 'Алый шарф, сталь клинков и рассвет над стенами',
+    characterTitle: 'Микаса Аккерман · Алый шарф',
+    motto: 'Крылья Свободы · Сталь и рассвет',
+    subtitle: 'Холодное небо, алый шарф и клинки Разведкорпуса',
     receiptTitle: 'Отчёт разведкорпуса',
     analyticsLabel: 'Сводка Разведки',
     symbolTag: 'WINGS',
@@ -275,43 +253,39 @@ export const KESH_THEMES: KeshThemeSpec[] = [
         id: 'mikasa_scarf_photo',
         label: 'Алый шарф',
         image: '/assets/aistudio/0dc010f1dc874763b7769d10f1c16ca3_0e33af78.jpg',
-        mood: 'calm',
+        position: 'center 28%',
       },
       {
         id: 'mikasa_dawn',
         label: 'Рассвет у стен',
         image: mikasaDawnScene,
-        mood: 'focus',
+        position: 'center 35%',
       },
       {
         id: 'mikasa_belltower',
         label: 'Над городом',
         image: mikasaScarfBg,
-        mood: 'alert',
+        position: 'center 35%',
       },
     ],
-    quotes: {
-      healthy: 'Чёткая дисциплина. Запасов достаточно, продолжай двигаться вперёд.',
-      caution: 'Половина лимита израсходована — держи фокус только на важном.',
-      alert: 'Лимит на критическом уровне! Защити свой остаток до конца месяца.',
-    },
-    background: '#0A0B0E',
-    surface: '#13161C',
-    surfaceGlass: 'rgba(16, 19, 25, 0.85)',
-    surfaceVariant: '#252A36',
-    primary: '#E11D48',
-    secondary: '#94A3B8',
-    cardBorder: 'rgba(225, 29, 72, 0.44)',
-    cardGlow: '0 0 22px rgba(225, 29, 72, 0.15)',
-    textPrimary: '#F8FAFC',
-    textSecondary: '#CBD5E1',
+    background: '#11161F',
+    surface: '#1A212E',
+    surfaceGlass: 'rgba(20, 27, 38, 0.40)',
+    buttonGlass: 'rgba(225, 29, 72, 0.56)',
+    surfaceVariant: 'rgba(42, 52, 68, 0.56)',
+    primary: '#F43F5E',
+    secondary: '#CBD5E1',
+    cardBorder: 'rgba(255, 255, 255, 0.24)',
+    cardGlow: '0 8px 32px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.22)',
+    textPrimary: '#FFFFFF',
+    textSecondary: '#E2E8F0',
   },
   {
     id: 'marin',
     name: 'Marin',
-    characterTitle: 'Марин Китагава · Закат Токио',
-    motto: 'Закат в городе · Тёплые огни',
-    subtitle: 'Вечерняя улица, уютный свет и закатное небо',
+    characterTitle: 'Марин Китагава · Вечерний закат',
+    motto: 'Закатное небо · Тёплые огни улицы',
+    subtitle: 'Сумерки мегаполиса, огни фонарей и нежный закат',
     receiptTitle: 'Вечерние чеки и покупки',
     analyticsLabel: 'Закатная палитра',
     symbolTag: 'SUNSET',
@@ -325,36 +299,32 @@ export const KESH_THEMES: KeshThemeSpec[] = [
         id: 'marin_street_photo',
         label: 'Вечерняя улица',
         image: '/assets/aistudio/698cf351990225b0ffe748080a2f7568_afd297c8.jpg',
-        mood: 'calm',
+        position: '38% 85%',
       },
       {
         id: 'marin_cozy',
         label: 'Тёплый вечер',
         image: marinCozyScene,
-        mood: 'focus',
+        position: 'center 30%',
       },
       {
         id: 'marin_sunset',
         label: 'Закат Токио',
         image: marinSunsetBg,
-        mood: 'alert',
+        position: 'center 35%',
       },
     ],
-    quotes: {
-      healthy: 'Отличный баланс! Можно спокойно копить на крутую мечту или косплей.',
-      caution: 'Шопинг — это здорово, но давай заглянем в лимит, чтобы хватило на всё!',
-      alert: 'Ой, лимит почти закончился! Сделаем паузу в покупках на пару дней.',
-    },
-    background: '#130914',
-    surface: '#201021',
-    surfaceGlass: 'rgba(27, 13, 28, 0.82)',
-    surfaceVariant: '#3B1D3B',
-    primary: '#F472B6',
-    secondary: '#FB923C',
-    cardBorder: 'rgba(244, 114, 182, 0.45)',
-    cardGlow: '0 0 24px rgba(244, 114, 182, 0.18)',
-    textPrimary: '#FFF1F2',
-    textSecondary: '#FBCFE8',
+    background: '#161B26',
+    surface: '#212736',
+    surfaceGlass: 'rgba(22, 27, 40, 0.36)',
+    buttonGlass: 'rgba(244, 140, 127, 0.52)',
+    surfaceVariant: 'rgba(48, 54, 74, 0.52)',
+    primary: '#FDA4AF',
+    secondary: '#FBBF24',
+    cardBorder: 'rgba(255, 255, 255, 0.24)',
+    cardGlow: '0 8px 32px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.24)',
+    textPrimary: '#FFFFFF',
+    textSecondary: '#F1F5F9',
   },
   {
     id: 'dark_pro',
@@ -370,19 +340,15 @@ export const KESH_THEMES: KeshThemeSpec[] = [
     isDark: true,
     isLight: false,
     scenes: [],
-    quotes: {
-      healthy: 'Баланс в норме.',
-      caution: 'Половина лимита пройдена.',
-      alert: 'Лимит расходов почти исчерпан.',
-    },
     background: '#090D16',
     surface: '#111827',
-    surfaceGlass: 'rgba(17, 24, 39, 0.96)',
-    surfaceVariant: '#1F2937',
+    surfaceGlass: 'rgba(17, 24, 39, 0.72)',
+    buttonGlass: 'rgba(16, 185, 129, 0.82)',
+    surfaceVariant: 'rgba(31, 41, 55, 0.85)',
     primary: '#10B981',
     secondary: '#3B82F6',
-    cardBorder: 'rgba(31, 41, 55, 1)',
-    cardGlow: 'none',
+    cardBorder: 'rgba(255, 255, 255, 0.14)',
+    cardGlow: '0 8px 24px rgba(0, 0, 0, 0.25)',
     textPrimary: '#F9FAFB',
     textSecondary: '#9CA3AF',
   },
@@ -400,19 +366,15 @@ export const KESH_THEMES: KeshThemeSpec[] = [
     isDark: false,
     isLight: true,
     scenes: [],
-    quotes: {
-      healthy: 'Баланс в норме.',
-      caution: 'Половина лимита пройдена.',
-      alert: 'Лимит расходов почти исчерпан.',
-    },
-    background: '#F8FAFC',
+    background: '#F1F5F9',
     surface: '#FFFFFF',
-    surfaceGlass: 'rgba(255, 255, 255, 0.96)',
-    surfaceVariant: '#E2E8F0',
+    surfaceGlass: 'rgba(255, 255, 255, 0.72)',
+    buttonGlass: 'rgba(37, 99, 235, 0.88)',
+    surfaceVariant: 'rgba(226, 232, 240, 0.85)',
     primary: '#2563EB',
     secondary: '#0EA5E9',
-    cardBorder: 'rgba(226, 232, 240, 1)',
-    cardGlow: '0 4px 16px rgba(15, 23, 42, 0.05)',
+    cardBorder: 'rgba(15, 23, 42, 0.10)',
+    cardGlow: '0 6px 20px rgba(15, 23, 42, 0.06)',
     textPrimary: '#0F172A',
     textSecondary: '#475569',
   },
@@ -425,18 +387,19 @@ export function getThemeById(id?: string | null): KeshThemeSpec {
 
 export function resolveActiveScene(
   spec: KeshThemeSpec,
-  selectedSceneId: string | undefined,
-  autoMoodScene: boolean,
-  budgetRatio: number
+  selectedSceneId?: string,
+  customPhotoUrl?: string
 ): ThemeScene | null {
-  if (!spec.isAnime || spec.scenes.length === 0) return null;
-
-  if (autoMoodScene) {
-    const targetMood: SceneMood =
-      budgetRatio >= 0.85 ? 'alert' : budgetRatio >= 0.45 ? 'focus' : 'calm';
-    const byMood = spec.scenes.find((s) => s.mood === targetMood);
-    if (byMood) return byMood;
+  if (customPhotoUrl) {
+    return {
+      id: 'custom_gallery_photo',
+      label: 'Фото из галереи',
+      image: customPhotoUrl,
+      position: 'center center',
+    };
   }
+
+  if (!spec.isAnime || spec.scenes.length === 0) return null;
 
   if (selectedSceneId) {
     const found = spec.scenes.find((s) => s.id === selectedSceneId);
