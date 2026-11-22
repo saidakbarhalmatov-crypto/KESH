@@ -32,6 +32,10 @@ enum class AnimeVisualType {
     YUTA,
     MIKASA,
     MARIN,
+    ZENITSU,
+    TANJIRO,
+    HANJI,
+    NARUTO,
     SHARINGAN,
     STORM,
     FLAME,
@@ -430,3 +434,4 @@ fun ThemeEmblemBadge(
         }
     }
 }
+
