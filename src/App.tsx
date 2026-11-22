@@ -4,6 +4,7 @@ import {
   AiParsedTransaction,
   fileToScaledBase64,
   parseReceiptImageWithAi,
+  sanitizeGeminiApiKey,
 } from './ai/aiFinanceAssistant';
 import { AnalyticsScreen } from './components/AnalyticsScreen';
 import { AiAssistantSheet } from './components/AiAssistantSheet';
@@ -125,9 +126,10 @@ export function App() {
     showToast('Обработка чека...');
     try {
       const { base64, dataUrl, mimeType } = await fileToScaledBase64(file);
-      if (prefs.geminiApiKey.trim()) {
+      const cleanKey = sanitizeGeminiApiKey(prefs.geminiApiKey);
+      if (cleanKey) {
         try {
-          const aiParsed = await parseReceiptImageWithAi(prefs.geminiApiKey, base64, mimeType);
+          const aiParsed = await parseReceiptImageWithAi(cleanKey, base64, mimeType);
           setOcrResult({
             amount: aiParsed.amount,
             merchant: aiParsed.title,
@@ -138,8 +140,8 @@ export function App() {
             imagePreviewUrl: dataUrl,
           });
           return;
-        } catch {
-          // fallback to manual review with image preview
+        } catch (err) {
+          showToast(err instanceof Error ? err.message : 'Ошибка ИИ при чтении чека');
         }
       }
       setOcrResult({
@@ -208,6 +210,16 @@ export function App() {
             onOpenAdd={() => setShowAddSheet(true)}
             onScanReceiptFile={handleScanReceiptFile}
             onOpenAiAssistant={() => setShowAiSheet(true)}
+            onOpenManualOcr={() =>
+              setOcrResult({
+                amount: null,
+                merchant: 'Чек / Перевод',
+                bankName: 'Чек / Скриншот',
+                category: 'OTHER_EXPENSE',
+                type: 'EXPENSE',
+                rawText: '',
+              })
+            }
             onDeleteTransaction={handleDeleteTransaction}
           />
         )}
@@ -299,6 +311,18 @@ export function App() {
           apiKey={prefs.geminiApiKey}
           onDismiss={() => setShowAiSheet(false)}
           onTransactionSaved={handleAiTransactionSaved}
+          onOpenManualOcr={(imageDataUrl) => {
+            setShowAiSheet(false);
+            setOcrResult({
+              amount: null,
+              merchant: 'Чек (введите вручную)',
+              bankName: 'Чек / Скриншот',
+              category: 'OTHER_EXPENSE',
+              type: 'EXPENSE',
+              rawText: '',
+              imagePreviewUrl: imageDataUrl,
+            });
+          }}
         />
       )}
 

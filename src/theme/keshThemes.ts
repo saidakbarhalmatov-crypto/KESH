@@ -10,6 +10,8 @@ import mikasaScarfBg from '../assets/images/mikasa_scarf_bg_1795351141980.jpg';
 import mikasaDawnScene from '../assets/images/mikasa_dawn_scene_1795353298797.jpg';
 import marinSunsetBg from '../assets/images/marin_sunset_bg_1795351142197.jpg';
 import marinCozyScene from '../assets/images/marin_cozy_scene_1795353298699.jpg';
+import allureGirlsNeonBg from '../assets/images/allure_girls_neon_bg_1795359755162.jpg';
+import allureGirlsLoungeScene from '../assets/images/allure_girls_lounge_scene_1795359755727.jpg';
 
 export type AnimeVisualType =
   | 'NONE'
@@ -18,7 +20,8 @@ export type AnimeVisualType =
   | 'GOJO'
   | 'YUTA'
   | 'MIKASA'
-  | 'MARIN';
+  | 'MARIN'
+  | 'ALLURE';
 
 export interface ThemeScene {
   id: string;
@@ -325,6 +328,46 @@ export const KESH_THEMES: KeshThemeSpec[] = [
     cardGlow: '0 8px 32px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.24)',
     textPrimary: '#FFFFFF',
     textSecondary: '#F1F5F9',
+  },
+  {
+    id: 'velvet_allure',
+    name: 'Velvet Girls',
+    characterTitle: 'Ночной Токио · Дерзкий Гламур',
+    motto: 'Ночной неон · Флирт и бархатный стиль',
+    subtitle: 'Стильные аниме-девушки, малиновый неон и вечерний шик',
+    receiptTitle: 'Ночной чек-лист',
+    analyticsLabel: 'Вельветовый баланс',
+    symbolTag: 'VELVET',
+    animeType: 'ALLURE',
+    isAnime: true,
+    isDark: true,
+    isLight: false,
+    backgroundImage: allureGirlsNeonBg,
+    scenes: [
+      {
+        id: 'allure_neon_street',
+        label: 'Неон Токио',
+        image: allureGirlsNeonBg,
+        position: 'center 22%',
+      },
+      {
+        id: 'allure_rooftop_lounge',
+        label: 'Лаунж-бар',
+        image: allureGirlsLoungeScene,
+        position: 'center 25%',
+      },
+    ],
+    background: '#120612',
+    surface: '#1F0C20',
+    surfaceGlass: 'rgba(26, 9, 28, 0.44)',
+    buttonGlass: 'rgba(236, 72, 153, 0.56)',
+    surfaceVariant: 'rgba(58, 18, 56, 0.56)',
+    primary: '#EC4899',
+    secondary: '#FB7185',
+    cardBorder: 'rgba(255, 192, 224, 0.28)',
+    cardGlow: '0 8px 32px rgba(236, 72, 153, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.22)',
+    textPrimary: '#FFFFFF',
+    textSecondary: '#FCE7F3',
   },
   {
     id: 'dark_pro',

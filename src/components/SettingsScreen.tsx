@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Download, Image as ImageIcon, Palette, Trash2 } from 'lucide-react';
+import { sanitizeGeminiApiKey } from '../ai/aiFinanceAssistant';
 import { KeshThemeSpec } from '../theme/keshThemes';
 import { AkatsukiCloudSvg, KeshLuxuryEmblem } from './KeshAnimeArt';
 import { KeshTopHeader } from './KeshBrandComponents';
@@ -47,10 +48,12 @@ export const SettingsScreen: React.FC<{
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     const parsedBudget = parseFloat(budgetInput);
+    const cleanedKey = sanitizeGeminiApiKey(apiKeyInput);
+    setApiKeyInput(cleanedKey);
     onUpdateSettings(
       nameInput.trim() || 'Саидакбар',
       Number.isFinite(parsedBudget) && parsedBudget > 0 ? parsedBudget : monthlyBudget,
-      apiKeyInput.trim()
+      cleanedKey
     );
     setSavedNotice(true);
     setTimeout(() => setSavedNotice(false), 2500);
@@ -150,6 +153,9 @@ export const SettingsScreen: React.FC<{
                   border: `1px solid ${spec.cardBorder}`,
                 }}
               />
+              <p className="text-[11px] mt-1 leading-snug" style={{ color: spec.textSecondary }}>
+                Копируйте полный ключ (начинается с AIza...) иконкой копирования в Google AI Studio.
+              </p>
             </div>
 
             <button

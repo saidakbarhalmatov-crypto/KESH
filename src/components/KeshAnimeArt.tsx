@@ -228,6 +228,12 @@ export const CharacterAddActionIcon: React.FC<{ spec: KeshThemeSpec; size?: numb
           <path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" />
         </svg>
       );
+    case 'ALLURE':
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+        </svg>
+      );
     default:
       return (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
@@ -316,6 +322,16 @@ export const KeshLuxuryEmblem: React.FC<{
           <circle cx={50} cy={50} r={10} fill={spec.secondary} />
         </g>
       )}
+      {spec.animeType === 'ALLURE' && (
+        <g>
+          <circle cx={c} cy={c} r={r} fill="#1F0C20" stroke={spec.primary} strokeWidth={5} />
+          <path
+            d="M50 76 C50 76 23 58 23 40 C23 30 31 24 39 24 C44.5 24 48.5 27.5 50 31.5 C51.5 27.5 55.5 24 61 24 C69 24 77 30 77 40 C77 58 50 76 50 76 Z"
+            fill={spec.primary}
+          />
+          <path d="M50 38 L54 47 L63 50 L54 53 L50 62 L46 53 L37 50 L46 47 Z" fill="#FCE7F3" />
+        </g>
+      )}
       {spec.animeType === 'NONE' && (
         <g>
           <circle cx={c} cy={c} r={48} fill={spec.surfaceVariant} />
@@ -373,6 +389,15 @@ export const ThemeEmblemBadge: React.FC<{
         <g>
           <circle cx={c} cy={c} r={38} fill={spec.surface} stroke={spec.primary} strokeWidth={4} />
           <path d="M50 22 L56 44 L78 50 L56 56 L50 78 L44 56 L22 50 L44 44 Z" fill={spec.primary} />
+        </g>
+      )}
+      {spec.animeType === 'ALLURE' && (
+        <g>
+          <circle cx={c} cy={c} r={38} fill={spec.surface} stroke={spec.primary} strokeWidth={4} />
+          <path
+            d="M50 72 C50 72 28 57 28 42 C28 34 34 29 41 29 C45.5 29 48.8 32 50 35 C51.2 32 54.5 29 59 29 C66 29 72 34 72 42 C72 57 50 72 50 72 Z"
+            fill={spec.primary}
+          />
         </g>
       )}
       {spec.animeType === 'NONE' && (
@@ -441,6 +466,25 @@ export const AnalyticsAnimeCenter: React.FC<{
             fill="none"
             stroke="rgba(251,146,60,0.45)"
             strokeWidth={3}
+          />
+        </g>
+      )}
+      {spec.animeType === 'ALLURE' && (
+        <g>
+          <circle cx={cx} cy={cy} r={innerRadius} fill="#1F0C20" />
+          <circle
+            cx={cx}
+            cy={cy}
+            r={innerRadius * 0.74}
+            fill="none"
+            stroke="rgba(236,72,153,0.55)"
+            strokeWidth={3.5}
+          />
+          <circle
+            cx={cx}
+            cy={cy}
+            r={innerRadius * 0.45}
+            fill="rgba(251,113,133,0.35)"
           />
         </g>
       )}

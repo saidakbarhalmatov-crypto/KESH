@@ -6,6 +6,10 @@ import {
   ArrowDown,
   ArrowUp,
   Trash2,
+  Camera,
+  Image as ImageIcon,
+  FileText,
+  X,
 } from 'lucide-react';
 import { formatSom, TransactionEntity, TransactionType } from '../data/models';
 import { KeshThemeSpec } from '../theme/keshThemes';
@@ -27,6 +31,7 @@ export const OverviewScreen: React.FC<{
   onOpenAdd: () => void;
   onScanReceiptFile: (file: File) => void;
   onOpenAiAssistant: () => void;
+  onOpenManualOcr: () => void;
   onDeleteTransaction: (tx: TransactionEntity) => void;
 }> = ({
   spec,
@@ -37,11 +42,14 @@ export const OverviewScreen: React.FC<{
   onOpenAdd,
   onScanReceiptFile,
   onOpenAiAssistant,
+  onOpenManualOcr,
   onDeleteTransaction,
 }) => {
   const [selectedFilter, setSelectedFilter] = useState<FilterTab>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showOcrPicker, setShowOcrPicker] = useState(false);
   const receiptInputRef = useRef<HTMLInputElement | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
 
   const startOfMonth = useMemo(() => {
     const now = new Date();
@@ -105,6 +113,21 @@ export const OverviewScreen: React.FC<{
         ref={receiptInputRef}
         type="file"
         accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) {
+            onScanReceiptFile(file);
+          }
+          e.target.value = '';
+        }}
+      />
+
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];
@@ -235,7 +258,7 @@ export const OverviewScreen: React.FC<{
 
             <button
               type="button"
-              onClick={() => receiptInputRef.current?.click()}
+              onClick={() => setShowOcrPicker(true)}
               className="rounded-2xl py-3.5 px-2 flex flex-col items-center justify-center gap-1.5 font-bold text-xs transition-transform active:scale-95 cursor-pointer min-h-[76px] backdrop-blur-xl"
               style={{
                 backgroundColor: spec.surfaceGlass,
@@ -336,6 +359,89 @@ export const OverviewScreen: React.FC<{
           )}
         </div>
       </div>
+
+      {showOcrPicker && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+          onClick={() => setShowOcrPicker(false)}
+        >
+          <div
+            className="w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl p-5 space-y-3"
+            style={{
+              backgroundColor: spec.surface,
+              border: `1px solid ${spec.cardBorder}`,
+              boxShadow: spec.cardGlow,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-bold" style={{ color: spec.textPrimary }}>
+                {spec.receiptTitle}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowOcrPicker(false)}
+                aria-label="Закрыть"
+                className="p-2 rounded-xl cursor-pointer"
+                style={{ color: spec.textSecondary }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setShowOcrPicker(false);
+                cameraInputRef.current?.click();
+              }}
+              className="w-full flex items-center gap-3 p-3.5 rounded-2xl text-sm font-semibold cursor-pointer"
+              style={{
+                backgroundColor: `${spec.primary}26`,
+                color: spec.textPrimary,
+                border: `1px solid ${spec.cardBorder}`,
+              }}
+            >
+              <Camera size={19} style={{ color: spec.primary }} />
+              <span>Сфотографировать чек (Камера)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setShowOcrPicker(false);
+                receiptInputRef.current?.click();
+              }}
+              className="w-full flex items-center gap-3 p-3.5 rounded-2xl text-sm font-semibold cursor-pointer"
+              style={{
+                backgroundColor: spec.background,
+                color: spec.textPrimary,
+                border: `1px solid ${spec.cardBorder}`,
+              }}
+            >
+              <ImageIcon size={19} style={{ color: spec.primary }} />
+              <span>Выбрать фото / скриншот из галереи</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setShowOcrPicker(false);
+                onOpenManualOcr();
+              }}
+              className="w-full flex items-center gap-3 p-3.5 rounded-2xl text-sm font-semibold cursor-pointer"
+              style={{
+                backgroundColor: spec.background,
+                color: spec.textSecondary,
+                border: `1px solid ${spec.cardBorder}`,
+              }}
+            >
+              <FileText size={19} style={{ color: spec.primary }} />
+              <span>Вставить текст квитанции вручную</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
